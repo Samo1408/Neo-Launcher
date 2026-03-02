@@ -420,7 +420,6 @@
     <string name="dash_location">Standort</string>
     <string name="dash_location_summary">Standorteinstellungen ändern</string>
     <string name="dash_auto_rotation">Automatisch drehen</string>
-
     <string name="cat_desktop_grid">Raster und Layout</string>
     <string name="title_app_categorization_enable">Aktivieren von App-Kategorien</string>
     <string name="summary_app_categorization_enable">Erstelle Tabs oder Ordner</string>
