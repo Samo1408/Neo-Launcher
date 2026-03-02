@@ -425,7 +425,6 @@
     <string name="backup_create_new">Créer une nouvelle sauvegarde</string>
     <string name="permission_denied">Autorisation de lecture refusée !</string>
     <string name="enabled_events">Activé</string>
-
     <string name="summary_app_categorization_enable">Créer des onglets ou répertoires</string>
     <string name="cat_desktop_grid">Grille et disposition</string>
     <string name="title_app_categorization_enable">Activer les catégories d\'apps</string>
