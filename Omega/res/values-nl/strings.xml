@@ -57,7 +57,6 @@
     <string name="title_separate_work_apps">Tweede tabblad voor werkapps</string>
     <string name="num_hotseat_icons_pref_title">Aantal pictogrammen</string>
     <string name="summary_fuzzy_search">Geschatte overeenkomst voor app-zoekopdrachten.</string>
-
     <string name="title_drawer_layout">Lay-outmodus</string>
     <string name="title_drawer_vertical">Verticaal</string>
     <string name="hide_app_selected">Verborgen apps (%1$d)</string>
