@@ -410,7 +410,6 @@
     <string name="web_search_metager">Metager (Web)</string>
     <string name="web_search_searx">Searx (Web)</string>
     <string name="cat_desktop_grid">Izgara ve Düzen</string>
-
     <string name="title_app_categorization_enable">Uygulama kategorilerini etkinleştir</string>
     <string name="summary_app_categorization_enable">Sekmeler veya klasörler oluşturun</string>
     <string name="smartspace_pill_text_format">%1$s %2$s</string>
