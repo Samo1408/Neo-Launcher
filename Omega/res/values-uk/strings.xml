@@ -106,7 +106,6 @@
     <string name="title_search_hidden_apps">Знайти приховані застосунки</string>
     <string name="summary_fuzzy_search">Приблизна відповідність для пошуку застосунків.</string>
     <string name="title__drawer_icon_size">Розмір значків усіх застосунків</string>
-
     <string name="dialog_message_change_sort">Установити сортування застосунків за абеткою\?</string>
     <string name="cat_desktop_grid">Сітка та макет</string>
     <string name="icon_shape_squircle">Закруглений квадрат</string>
