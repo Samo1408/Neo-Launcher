@@ -430,7 +430,6 @@
     <string name="launch_assistant">Assistente di avvio</string>
     <string name="gesture_launch_assistant">Assistente di avvio (tramite pulsante o gesto)</string>
     <string name="dash_sync_summary">Attiva o disattiva la sincronizzazione.</string>
-
     <string name="title_dock_search">Barra di ricerca nella barra app</string>
     <string name="label_search">Cerca</string>
     <string name="theme_auto_night_mode_black">Sistema (nero)</string>
