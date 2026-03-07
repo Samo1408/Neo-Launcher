@@ -89,7 +89,6 @@
     <string name="title_all_apps_google_search">Výsledky na webu</string>
     <string name="title_search_hidden_apps">Najít skryté aplikace</string>
     <string name="summary_fuzzy_search">Přibližná shoda pro vyhledávání aplikací.</string>
-
     <string name="summary_app_categorization_enable">Vytvořit karty nebo složky</string>
     <string name="label_turn_off_suggestions">Zakázat</string>
     <string name="summary_all_apps_google_search">Najděte webové výsledky a aplikace</string>
@@ -224,7 +223,7 @@
     <string name="tab_shortcuts">Zástupci</string>
     <string name="hide_app">Schovat Aplikaci</string>
     <string name="app_widget_name">Hodiny</string>
-    <string name="web_search_metager"></string>
+    <string name="web_search_metager"/>
     <string name="dash_line_size">Velikost řádky nabídky Dash</string>
     <string name="title_drawer_all_apps">Vše</string>
     <string name="title__drawer_hide_apps">Skryté aplikace</string>

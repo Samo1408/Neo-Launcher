@@ -324,7 +324,7 @@
     <string name="battery_status">பேட்டர் நிலை</string>
     <string name="full_wday_month_day_no_year">EEEE, MMMM டி</string>
     <string name="icu_abbrev_time">HH: மிமீ</string>
-    <string name="icu_abbrev_time_12h">HH: MM AA</string>
+    <string name="icu_abbrev_time_12h">hh:mm aa</string>
     <string name="icu_abbrev_date">டி.டி எம்.எம்.எம்</string>
     <string name="units_metric">செல்சியச்</string>
     <string name="units_imperial">பாரன்ஈட்</string>
@@ -512,7 +512,7 @@
     <string name="pref_desktop_mode_summary">ஆண்ட்ராய்டு டெச்க்டாப் பயன்முறையை செயல்படுத்தவும்</string>
     <string name="pref_desktop_mode_settings">டெச்க்டாப் பயன்முறை அமைப்புகள்</string>
     <string name="web_search_metager">மெட்டேசர் (வலை)</string>
-    <string name="web_search_searx">SEARX (வலை)</string>
+    <string name="web_search_searx">Searx (வலை)</string>
     <string name="web_search_phind">பைண்ட் (வலை)</string>
     <string name="web_search_perplexity">குழப்பம் (வலை)</string>
     <string name="web_search_you">நீங்கள் (வலை)</string>
