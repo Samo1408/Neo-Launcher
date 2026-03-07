@@ -185,7 +185,6 @@
     <string name="weather_city">Stad</string>
     <string name="title__drawer_rows">Antal rader</string>
     <string name="title_drawer_enable_background">Använd anpassad bakgrundsfärg</string>
-
     <string name="summary__drawer_hide_apps">Dölj app från appsidan</string>
     <string name="label_search">Sök</string>
     <string name="cat_dock_search">docka</string>

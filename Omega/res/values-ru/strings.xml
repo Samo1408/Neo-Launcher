@@ -387,7 +387,6 @@
     <string name="summary_colored_backgrounds">Для фона адаптивных иконок.</string>
     <string name="title_dock_search">Поисковая строка Dock</string>
     <string name="summary_dock_search">Показать под панелью</string>
-
     <string name="cat_desktop_grid">Сетка</string>
     <string name="summary_app_categorization_enable">Создать вкладку или папку</string>
     <string name="summary_force_shapeless">Попробовать использовать устаревшие значки для всех приложений.</string>

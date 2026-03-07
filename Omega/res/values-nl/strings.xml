@@ -57,7 +57,6 @@
     <string name="title_separate_work_apps">Tweede tabblad voor werkapps</string>
     <string name="num_hotseat_icons_pref_title">Aantal pictogrammen</string>
     <string name="summary_fuzzy_search">Geschatte overeenkomst voor app-zoekopdrachten.</string>
-
     <string name="title_drawer_layout">Lay-outmodus</string>
     <string name="title_drawer_vertical">Verticaal</string>
     <string name="hide_app_selected">Verborgen apps (%1$d)</string>
@@ -306,7 +305,7 @@
     <string name="web_search_wolfram_alpha">Wolfram Alpha (Web)</string>
     <string name="title_drawer_all_apps">Alle</string>
     <string name="title_drawer_horizontal">Horizontaal</string>
-    <string name="title_drawer_categorized">Gecategoriseerd</string>
+    <string name="title_drawer_categorized">Verticale categorieën</string>
     <string name="color_wallpaper_tertiary">Tertiaire kleur van de achtergrond</string>
     <string name="title_themed_background">Transparante pictogramachtergrond</string>
     <string name="icon_picker_default_category">Pictogrammen</string>
@@ -520,5 +519,24 @@
     <string name="edit_search_summary">Actieve zoekmachines selecteren en sorteren</string>
     <string name="add_search_provider">Aanbieder toevoegen</string>
     <string name="search_provider_url_hint">Gebruik %s in plaats van de zoekterm</string>
-    <string name="title_drawer_layout_categories">Lay-outcategorieën</string>
+    <string name="title_drawer_layout_categories">Categorieën beheren</string>
+    <string name="title_manage_tabs">Tabs beheren</string>
+    <string name="summary_manage_tabs">Tabs maken of bewerken</string>
+    <string name="title_drawer_tabs">Horizontale tabs</string>
+    <string name="category_art_and_design">Ontwerp</string>
+    <string name="category_business_and_productivity">Productiviteit</string>
+    <string name="category_communication">Communicatie</string>
+    <string name="category_entertainment">Vermaak</string>
+    <string name="category_game">Spelletjes</string>
+    <string name="category_lifestyle">Levensstijl</string>
+    <string name="category_knowledge_and_reference">Wetenschap</string>
+    <string name="category_music">Muziek</string>
+    <string name="category_news">Nieuws</string>
+    <string name="category_personalization">Personalisatie</string>
+    <string name="category_tools">Hulpmiddelen</string>
+    <string name="category_travel_and_navigation">Navigatie</string>
+    <string name="trust_apps_unlock">Ontgrendelen</string>
+    <string name="trust_apps_message">Authenticatie vereist voor toegang tot beveiligde apps</string>
+    <string name="title__about_acknowledgement">Dankbetuiging</string>
+    <string name="category_health_and_fitness">Gezondheid</string>
 </resources>
