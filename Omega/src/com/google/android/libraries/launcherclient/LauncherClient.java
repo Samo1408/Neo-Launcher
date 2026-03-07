@@ -41,7 +41,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
-import com.android.launcher3.qsb.OSEManager;
 import com.neoapps.neolauncher.preferences.NeoPrefs;
 
 import java.lang.ref.WeakReference;
@@ -49,85 +48,85 @@ import java.lang.ref.WeakReference;
 public class LauncherClient {
     private static int apiVersion = -1;
 
-    private ILauncherOverlay mOverlay;
-    public final IScrollCallback mScrollCallback;
+    private ILauncherOverlay overlay;
+    public final IScrollCallback scrollCallback;
 
-    public final BaseClientService mBaseService;
-    public final LauncherClientService mLauncherService;
+    public final BaseClientService baseClientService;
+    public final LauncherClientService launcherClientService;
 
     public final BroadcastReceiver googleInstallListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mBaseService.disconnect();
-            mLauncherService.disconnect();
+            baseClientService.disconnect();
+            launcherClientService.disconnect();
             LauncherClient.loadApiVersion(context);
-            if ((mActivityState & 2) != 0) {
+            if ((activityState & 2) != 0) {
                 connect();
             }
         }
     };
 
-    private int mActivityState = 0;
-    private int mServiceState = 0;
-    public int mFlags;
+    private int activityState = 0;
+    private int serviceState = 0;
+    public int flags;
 
-    public LayoutParams mLayoutParams;
-    public OverlayCallback mOverlayCallback;
+    public LayoutParams layoutParams;
+    public OverlayCallback overlayCallback;
     public final Activity mActivity;
 
-    public boolean mDestroyed = false;
-    private Bundle mLayoutBundle;
+    public boolean isDestroyed = false;
+    private Bundle layoutBundle;
 
-    public class OverlayCallback extends ILauncherOverlayCallback.Stub implements Callback {
-        public LauncherClient mClient;
-        private final Handler mUIHandler = new Handler(Looper.getMainLooper(), this);
-        public Window mWindow;
-        private boolean mWindowHidden = false;
-        public WindowManager mWindowManager;
-        int mWindowShift;
+    public static class OverlayCallback extends ILauncherOverlayCallback.Stub implements Callback {
+        public LauncherClient launcherClient;
+        private final Handler uiHandler = new Handler(Looper.getMainLooper(), this);
+        public Window window;
+        private boolean windowHidden = false;
+        public WindowManager windowManager;
+        int windowShift;
 
         @Override
         public final void overlayScrollChanged(float f) {
-            mUIHandler.removeMessages(2);
-            Message.obtain(mUIHandler, 2, f).sendToTarget();
-            if (f > 0f && mWindowHidden) {
-                mWindowHidden = false;
+            uiHandler.removeMessages(2);
+            Message.obtain(uiHandler, 2, f).sendToTarget();
+            if (f > 0f && windowHidden) {
+                windowHidden = false;
             }
         }
 
         @Override
         public final void overlayStatusChanged(int i) {
-            Message.obtain(mUIHandler, 4, i, 0).sendToTarget();
+            Message.obtain(uiHandler, 4, i, 0).sendToTarget();
         }
 
         @Override
         public boolean handleMessage(Message message) {
-            if (mClient == null) {
+            if (launcherClient == null) {
                 return true;
             }
 
             switch (message.what) {
                 case 2:
-                    if ((mClient.mServiceState & 1) != 0) {
+                    if ((launcherClient.serviceState & 1) != 0) {
                         float floatValue = (float) message.obj;
-                        mClient.mScrollCallback.onOverlayScrollChanged(floatValue);
+                        launcherClient.scrollCallback.onOverlayScrollChanged(floatValue);
                     }
                     return true;
                 case 3:
-                    WindowManager.LayoutParams attributes = mWindow.getAttributes();
+                    WindowManager.LayoutParams attributes = window.getAttributes();
                     if ((Boolean) message.obj) {
-                        attributes.x = mWindowShift;
+                        attributes.x = windowShift;
                         attributes.flags |= FLAG_LAYOUT_NO_LIMITS;
                     } else {
                         attributes.x = 0;
                         attributes.flags &= -513;
                     }
-                    mWindowManager.updateViewLayout(mWindow.getDecorView(), attributes);
+                    windowManager.updateViewLayout(window.getDecorView(), attributes);
                     return true;
                 case 4:
-                    mClient.setServiceState(message.arg1);
-                    if (mClient.mScrollCallback instanceof ISerializableScrollCallback) {
-                        ((ISerializableScrollCallback) mClient.mScrollCallback).setPersistentFlags(message.arg1);
+                    launcherClient.setServiceState(message.arg1);
+                    if (launcherClient.scrollCallback instanceof ISerializableScrollCallback) {
+                        ((ISerializableScrollCallback) launcherClient.scrollCallback).setPersistentFlags(message.arg1);
                     }
                     return true;
                 default:
@@ -138,13 +137,13 @@ public class LauncherClient {
 
     public LauncherClient(Activity activity, IScrollCallback scrollCallback, StaticInteger flags) {
         mActivity = activity;
-        mScrollCallback = scrollCallback;
-        mBaseService = new BaseClientService(activity, Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT);
-        mFlags = flags.mData;
+        this.scrollCallback = scrollCallback;
+        baseClientService = new BaseClientService(activity, Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT);
+        this.flags = flags.mData;
 
-        mLauncherService = LauncherClientService.getInstance(activity);
-        mLauncherService.mClient = new WeakReference<>(this);
-        mOverlay = mLauncherService.mOverlay;
+        launcherClientService = LauncherClientService.getInstance(activity);
+        launcherClientService.mClient = new WeakReference<>(this);
+        overlay = launcherClientService.mOverlay;
 
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         intentFilter.addDataScheme("package");
@@ -165,33 +164,33 @@ public class LauncherClient {
 
     public void setEnableFeed(boolean enable) {
         if (enable) {
-            mFlags |= 1;
+            flags |= 1;
         } else {
-            mFlags &= ~1;
+            flags &= ~1;
         }
     }
 
     public final void onAttachedToWindow() {
-        if (!mDestroyed) {
+        if (!isDestroyed) {
             setLayoutParams(mActivity.getWindow().getAttributes());
         }
     }
 
     public final void onDetachedFromWindow() {
-        if (!mDestroyed) {
+        if (!isDestroyed) {
             setLayoutParams(null);
         }
     }
 
     public final void onResume() {
-        if (!mDestroyed) {
-            mActivityState |= 2;
-            if (mOverlay != null && mLayoutParams != null) {
+        if (!isDestroyed) {
+            activityState |= 2;
+            if (overlay != null && layoutParams != null) {
                 try {
                     if (apiVersion < 4) {
-                        mOverlay.onResume();
+                        overlay.onResume();
                     } else {
-                        mOverlay.setActivityState(mActivityState);
+                        overlay.setActivityState(activityState);
                     }
                 } catch (RemoteException ignored) {
                 }
@@ -200,14 +199,14 @@ public class LauncherClient {
     }
 
     public final void onPause() {
-        if (!mDestroyed) {
-            mActivityState &= -3;
-            if (mOverlay != null && mLayoutParams != null) {
+        if (!isDestroyed) {
+            activityState &= -3;
+            if (overlay != null && layoutParams != null) {
                 try {
                     if (apiVersion < 4) {
-                        mOverlay.onPause();
+                        overlay.onPause();
                     } else {
-                        mOverlay.setActivityState(mActivityState);
+                        overlay.setActivityState(activityState);
                     }
                 } catch (RemoteException ignored) {
                 }
@@ -216,13 +215,13 @@ public class LauncherClient {
     }
 
     public final void onStart() {
-        if (!mDestroyed) {
-            mLauncherService.setStopped(false);
+        if (!isDestroyed) {
+            launcherClientService.setStopped(false);
             connect();
-            mActivityState |= 1;
-            if (mOverlay != null && mLayoutParams != null) {
+            activityState |= 1;
+            if (overlay != null && layoutParams != null) {
                 try {
-                    mOverlay.setActivityState(mActivityState);
+                    overlay.setActivityState(activityState);
                 } catch (RemoteException ignored) {
                 }
             }
@@ -230,13 +229,13 @@ public class LauncherClient {
     }
 
     public final void onStop() {
-        if (!mDestroyed) {
-            mLauncherService.setStopped(true);
-            mBaseService.disconnect();
-            mActivityState &= -2;
-            if (!(mOverlay == null || mLayoutParams == null)) {
+        if (!isDestroyed) {
+            launcherClientService.setStopped(true);
+            baseClientService.disconnect();
+            activityState &= -2;
+            if (!(overlay == null || layoutParams == null)) {
                 try {
-                    mOverlay.setActivityState(mActivityState);
+                    overlay.setActivityState(activityState);
                 } catch (RemoteException ignored) {
                 }
             }
@@ -244,78 +243,78 @@ public class LauncherClient {
     }
 
     public void onDestroy() {
-        if (!mDestroyed) {
+        if (!isDestroyed) {
             try {
                 mActivity.unregisterReceiver(googleInstallListener);
             } catch (IllegalArgumentException ignored) {
             }
-            mDestroyed = true;
-            mBaseService.disconnect();
-            mLauncherService.disconnect();
+            isDestroyed = true;
+            baseClientService.disconnect();
+            launcherClientService.disconnect();
         }
     }
 
     private void connect() {
-        if (!mDestroyed && (!mLauncherService.connect() || !mBaseService.connect())) {
+        if (!isDestroyed && (!launcherClientService.connect() || !baseClientService.connect())) {
             mActivity.runOnUiThread(() -> setServiceState(0));
         }
     }
 
     public void reconnect() {
-        mBaseService.disconnect();
-        mLauncherService.disconnect();
+        baseClientService.disconnect();
+        launcherClientService.disconnect();
         LauncherClient.loadApiVersion(mActivity);
-        if ((mActivityState & 2) != 0) {
+        if ((activityState & 2) != 0) {
             connect();
         }
     }
 
     public final void setLayoutParams(LayoutParams layoutParams) {
-        if (mLayoutParams != layoutParams) {
-            mLayoutParams = layoutParams;
-            if (mLayoutParams != null) {
+        if (this.layoutParams != layoutParams) {
+            this.layoutParams = layoutParams;
+            if (this.layoutParams != null) {
                 exchangeConfig();
-            } else if (mOverlay != null) {
+            } else if (overlay != null) {
                 try {
-                    mOverlay.windowDetached(mActivity.isChangingConfigurations());
+                    overlay.windowDetached(mActivity.isChangingConfigurations());
                 } catch (RemoteException ignored) {
                 }
-                mOverlay = null;
+                overlay = null;
             }
         }
     }
 
     public final void exchangeConfig() {
-        if (mOverlay != null) {
+        if (overlay != null) {
             try {
-                if (mOverlayCallback == null) {
-                    mOverlayCallback = new OverlayCallback();
+                if (overlayCallback == null) {
+                    overlayCallback = new OverlayCallback();
                 }
-                OverlayCallback overlayCallback = mOverlayCallback;
-                overlayCallback.mClient = this;
-                overlayCallback.mWindowManager = mActivity.getWindowManager();
+                OverlayCallback overlayCallback = this.overlayCallback;
+                overlayCallback.launcherClient = this;
+                overlayCallback.windowManager = mActivity.getWindowManager();
                 Point point = new Point();
-                overlayCallback.mWindowManager.getDefaultDisplay().getRealSize(point);
-                overlayCallback.mWindowShift = -Math.max(point.x, point.y);
-                overlayCallback.mWindow = mActivity.getWindow();
+                overlayCallback.windowManager.getDefaultDisplay().getRealSize(point);
+                overlayCallback.windowShift = -Math.max(point.x, point.y);
+                overlayCallback.window = mActivity.getWindow();
                 if (apiVersion < 3) {
-                    mOverlay.windowAttached(mLayoutParams, mOverlayCallback, mFlags);
+                    overlay.windowAttached(layoutParams, this.overlayCallback, flags);
                 } else {
                     Bundle bundle = new Bundle();
-                    bundle.putParcelable("layout_params", mLayoutParams);
+                    bundle.putParcelable("layout_params", layoutParams);
                     bundle.putParcelable("configuration", mActivity.getResources().getConfiguration());
-                    bundle.putInt("client_options", mFlags);
-                    if (mLayoutBundle != null) {
-                        bundle.putAll(mLayoutBundle);
+                    bundle.putInt("client_options", flags);
+                    if (layoutBundle != null) {
+                        bundle.putAll(layoutBundle);
                     }
-                    mOverlay.windowAttached2(bundle, mOverlayCallback);
+                    overlay.windowAttached2(bundle, this.overlayCallback);
                 }
                 if (apiVersion >= 4) {
-                    mOverlay.setActivityState(mActivityState);
-                } else if ((mActivityState & 2) != 0) {
-                    mOverlay.onResume();
+                    overlay.setActivityState(activityState);
+                } else if ((activityState & 2) != 0) {
+                    overlay.onResume();
                 } else {
-                    mOverlay.onPause();
+                    overlay.onPause();
                 }
             } catch (RemoteException ignored) {
             }
@@ -323,13 +322,13 @@ public class LauncherClient {
     }
 
     private boolean isConnected() {
-        return mOverlay != null;
+        return overlay != null;
     }
 
     public final void startScroll() {
         if (isConnected()) {
             try {
-                mOverlay.startScroll();
+                overlay.startScroll();
             } catch (RemoteException ignored) {
             }
         }
@@ -338,7 +337,7 @@ public class LauncherClient {
     public final void endScroll() {
         if (isConnected()) {
             try {
-                mOverlay.endScroll();
+                overlay.endScroll();
             } catch (RemoteException ignored) {
             }
         }
@@ -347,7 +346,7 @@ public class LauncherClient {
     public final void setScroll(float f) {
         if (isConnected()) {
             try {
-                mOverlay.onScroll(f);
+                overlay.onScroll(f);
             } catch (RemoteException ignored) {
             }
         }
@@ -361,37 +360,36 @@ public class LauncherClient {
     }
 
     public final void hideOverlay(boolean feedRunning) {
-        if (mOverlay != null) {
+        if (overlay != null) {
             try {
-                mOverlay.closeOverlay(feedRunning ? 1 : 0);
+                overlay.closeOverlay(feedRunning ? 1 : 0);
             } catch (RemoteException ignored) {
             }
         }
     }
 
     public final void hideOverlay(int duration) {
-        if (mOverlay != null) {
+        if (overlay != null) {
             try {
-                mOverlay.closeOverlay(verifyAndGetAnimationFlags(duration));
+                overlay.closeOverlay(verifyAndGetAnimationFlags(duration));
             } catch (RemoteException ignored) {
             }
         }
     }
 
-    // Only used for accessibility
     public final void showOverlay(boolean feedRunning) {
-        if (mOverlay != null) {
+        if (overlay != null) {
             try {
-                mOverlay.openOverlay(feedRunning ? 1 : 0);
+                overlay.openOverlay(feedRunning ? 1 : 0);
             } catch (RemoteException ignored) {
             }
         }
     }
 
     public final boolean startSearch(byte[] bArr, Bundle bundle) {
-        if (apiVersion >= 6 && mOverlay != null) {
+        if (apiVersion >= 6 && overlay != null) {
             try {
-                return mOverlay.startSearch(bArr, bundle);
+                return overlay.startSearch(bArr, bundle);
             } catch (Throwable e) {
                 Log.e("DrawerOverlayClient", "Error starting session for search", e);
             }
@@ -399,39 +397,38 @@ public class LauncherClient {
         return false;
     }
 
-    public final void redraw(Bundle layoutBundle) {
-        mLayoutBundle = layoutBundle;
-        if (mLayoutParams != null && apiVersion >= 7) {
-            exchangeConfig();
-        }
-    }
-
     public final void redraw() {
-        if (mLayoutParams != null && apiVersion >= 7) {
+        if (layoutParams != null && apiVersion >= 7) {
             exchangeConfig();
         }
     }
 
     final void setOverlay(ILauncherOverlay overlay) {
-        mOverlay = overlay;
-        if (mOverlay == null) {
+        this.overlay = overlay;
+        if (this.overlay == null) {
             setServiceState(0);
-        } else if (mLayoutParams != null) {
+        } else if (layoutParams != null) {
             exchangeConfig();
         }
     }
 
     private void setServiceState(int serviceState) {
-        if (mServiceState != serviceState) {
-            mServiceState = serviceState;
-            mScrollCallback.onServiceStateChanged((serviceState & 1) != 0);
+        if (this.serviceState != serviceState) {
+            this.serviceState = serviceState;
+            boolean isAttached = (serviceState & 1) != 0;
+            boolean hotwordActive = (serviceState & 2) != 0;
+            if (scrollCallback instanceof LauncherClientCallbacks) {
+                ((LauncherClientCallbacks) scrollCallback).onServiceStateChanged(isAttached, hotwordActive);
+            } else {
+                scrollCallback.onServiceStateChanged(isAttached);
+            }
         }
     }
 
-    static Intent getIntent(Context context, boolean proxy) {
+    protected static Intent getIntent(Context context, boolean proxy) {
         String pkg = context.getPackageName();
         NeoPrefs prefs = NeoPrefs.getInstance();
-        return new Intent(OSEManager.OVERLAY_ACTION)
+        return new Intent("com.android.launcher3.WINDOW_OVERLAY")
                 .setPackage(prefs.getFeedProvider().getValue())
                 .setData(Uri.parse("app://" +
                                 pkg +

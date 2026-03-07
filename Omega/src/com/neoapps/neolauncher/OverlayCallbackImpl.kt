@@ -18,7 +18,6 @@
 
 package com.neoapps.neolauncher
 
-import android.util.Log
 import android.view.MotionEvent
 import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
@@ -33,23 +32,30 @@ import com.google.android.libraries.launcherclient.LauncherClientCallbacks
 import com.google.android.libraries.launcherclient.StaticInteger
 import com.neoapps.neolauncher.preferences.NeoPrefs
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class OverlayCallbackImpl(val launcher: Launcher) : LauncherOverlayTouchProxy,
     LauncherClientCallbacks, LauncherOverlayManager,
     IScrollCallback {
 
-    private var mClient: LauncherClient? = null
-    private var mLauncherOverlayCallbacks: LauncherOverlayCallbacks? = null
-    private var mWasOverlayAttached = false
-    private var mFlagsChanged = false
-    private var mFlags = 0
+    private var launcherClient: LauncherClient? = null
+    private var launcherOverlayCallbacks: LauncherOverlayCallbacks? = null
+    private var wasOverlayAttached = false
+    private var flagsChanged = false
+    private var flags = 0
     private var feedEnabled = false
     private val prefs = NeoPrefs.getInstance()
     private var job: Job? = null
 
     init {
-        mClient = LauncherClient(
+        job = prefs.feedProvider.get()
+            .onEach { provider ->
+                setEnableFeed(provider.isNotEmpty())
+            }
+            .launchIn(launcher.lifecycleScope)
+
+        launcherClient = LauncherClient(
             launcher, this, StaticInteger(
                 (if (feedEnabled) 1 else 0) or 2 or 4 or 8
             )
@@ -57,52 +63,53 @@ class OverlayCallbackImpl(val launcher: Launcher) : LauncherOverlayTouchProxy,
     }
 
     fun reconnect() {
-        mClient?.reconnect()
+        launcherClient?.reconnect()
     }
 
     fun setEnableFeed(enable: Boolean) {
         feedEnabled = enable
-        mClient?.setEnableFeed(enable)
+        launcherClient?.setEnableFeed(enable)
         reconnect()
     }
 
     override fun onDeviceProvideChanged() {
-        mClient?.redraw()
+        launcherClient?.redraw()
     }
 
     override fun onAttachedToWindow() {
-        job = launcher.launcher.lifecycleScope.launch {
-            prefs.feedProvider.get().collect {
-                mClient?.onDestroy()
-                feedEnabled = it != ""
-                mClient = LauncherClient(
-                    launcher, this@OverlayCallbackImpl, StaticInteger(
-                        (if (feedEnabled) 1 else 0) or 2 or 4 or 8
-                    )
-                )
-            }
-        }
-        mClient?.onAttachedToWindow()
+        launcherClient?.onAttachedToWindow()
     }
 
     override fun onDetachedFromWindow() {
-        job?.cancel()
-        mClient?.onDetachedFromWindow()
-        mClient?.onDestroy()
+        launcherClient!!.onDetachedFromWindow()
     }
 
+    override fun onActivityStarted() {
+        launcherClient!!.onStart()
+    }
+
+    override fun onActivityResumed() {
+        launcherClient!!.onResume()
+    }
+
+    override fun onActivityPaused() {
+        launcherClient!!.onPause()
+    }
+
+    override fun onActivityStopped() {
+        launcherClient!!.onStop()
+    }
 
     override fun openOverlay() {
-        Log.d("OverlayCallbackImpl", "openOverlay")
-        mClient!!.showOverlay(true)
+        launcherClient!!.showOverlay(true)
     }
 
     override fun hideOverlay(animate: Boolean) {
-        mClient!!.hideOverlay(animate)
+        launcherClient!!.hideOverlay(animate)
     }
 
     override fun hideOverlay(duration: Int) {
-        mClient!!.hideOverlay(duration)
+        launcherClient!!.hideOverlay(duration)
     }
 
 
@@ -111,39 +118,49 @@ class OverlayCallbackImpl(val launcher: Launcher) : LauncherOverlayTouchProxy,
     }
 
     override fun onOverlayMotionEvent(ev: MotionEvent?, scrollProgress: Float) {
-
+        if (ev == null) return
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN -> launcherClient?.startScroll()
+            MotionEvent.ACTION_MOVE -> launcherClient?.setScroll(scrollProgress)
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> launcherClient?.endScroll()
+        }
     }
 
     override fun onOverlayScrollChanged(progress: Float) {
-        if (mLauncherOverlayCallbacks != null) {
-            mLauncherOverlayCallbacks!!.onOverlayScrollChanged(progress)
+        if (launcherOverlayCallbacks != null) {
+            launcherOverlayCallbacks!!.onOverlayScrollChanged(progress)
         }
     }
 
     override fun onServiceStateChanged(overlayAttached: Boolean, hotwordActive: Boolean) {
         this.onServiceStateChanged(overlayAttached)
+        if (overlayAttached != wasOverlayAttached) {
+            wasOverlayAttached = overlayAttached
+            launcher.setLauncherOverlay(if (overlayAttached) this else null)
+        }
     }
 
     override fun onServiceStateChanged(overlayAttached: Boolean) {
-        if (overlayAttached != mWasOverlayAttached) {
-            mWasOverlayAttached = overlayAttached
+        if (overlayAttached != wasOverlayAttached) {
+            wasOverlayAttached = overlayAttached
             launcher.setLauncherOverlay(if (overlayAttached) this else null)
         }
     }
 
     override fun onActivityDestroyed() {
-        mClient?.onDestroy()
+        job?.cancel()
+        launcherClient?.onDestroy()
     }
 
     override fun setOverlayCallbacks(callbacks: LauncherOverlayCallbacks) {
-        mLauncherOverlayCallbacks = callbacks
+        launcherOverlayCallbacks = callbacks
     }
 
     override fun setPersistentFlags(myFlags: Int) {
         val newFlags = myFlags and (8 or 16)
-        if (newFlags != mFlags) {
-            mFlagsChanged = true
-            mFlags = newFlags
+        if (newFlags != flags) {
+            flagsChanged = true
+            flags = newFlags
             LauncherPrefs.getDevicePrefs(launcher).edit { putInt(PREF_PERSIST_FLAGS, newFlags) }
         }
     }
