@@ -23,7 +23,6 @@ import android.content.Context
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
-import androidx.lifecycle.asLiveData
 import com.neoapps.neolauncher.preferences.NeoPrefs
 
 open class BaseClientService(val context: Context, flags: Int) : ServiceConnection {
@@ -34,15 +33,13 @@ open class BaseClientService(val context: Context, flags: Int) : ServiceConnecti
     fun connect(): Boolean {
         if (!isConnected) {
             try {
-                prefs.feedProvider.get().asLiveData().observeForever {
-                    isEnabled = it != ""
-                    if (isEnabled) {
-                        isConnected = context.bindService(
-                            LauncherClient.getIntent(context, false),
-                            this,
-                            mFlags
-                        )
-                    }
+                isEnabled = prefs.feedProvider.getValue() != ""
+                if (isEnabled) {
+                    isConnected = context.bindService(
+                        LauncherClient.getIntent(context, false),
+                        this,
+                        mFlags
+                    )
                 }
             } catch (e: Throwable) {
                 Log.e("LauncherClient", "Unable to connect to overlay service", e)
@@ -56,8 +53,6 @@ open class BaseClientService(val context: Context, flags: Int) : ServiceConnecti
             context.unbindService(this)
             isConnected = false
         }
-        prefs.feedProvider.get().asLiveData().removeObserver { }
-
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {}

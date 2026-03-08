@@ -321,7 +321,7 @@ public class LauncherClient {
         }
     }
 
-    private boolean isConnected() {
+    public boolean isConnected() {
         return overlay != null;
     }
 
@@ -441,9 +441,9 @@ public class LauncherClient {
     }
 
     private static void loadApiVersion(Context context) {
-        ResolveInfo resolveService = context.getPackageManager().resolveService(getIntent(context, false), PackageManager.GET_META_DATA);
-        apiVersion = resolveService == null || resolveService.serviceInfo.metaData == null ?
-                1 :
-                resolveService.serviceInfo.metaData.getInt("service.api.version", 1);
+        ResolveInfo resolveService = context.getPackageManager().resolveService(getIntent(context, false),
+                PackageManager.GET_META_DATA);
+        apiVersion = resolveService == null || resolveService.serviceInfo.metaData == null ? 1
+                : resolveService.serviceInfo.metaData.getInt("service.api.version", 1);
     }
 }

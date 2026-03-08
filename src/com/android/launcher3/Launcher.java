@@ -107,7 +107,6 @@ import static com.android.launcher3.util.SettingsCache.TOUCHPAD_NATURAL_SCROLLIN
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
@@ -580,6 +579,11 @@ public class Launcher extends StatefulActivity<LauncherState>
         // #1 auto cancel action mode handler
         if (isInAutoCancelActionMode()) {
             return this::finishAutoCancelActionMode;
+        }
+
+        // #1.5 overlay handler
+        if (mWorkspace != null && mWorkspace.isOverlayShown()) {
+            return () -> mOverlayManager.hideOverlay(true);
         }
 
         // #2 drag handler
@@ -2082,6 +2086,15 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     @Override
     public void onBackPressed() {
+        if (mWorkspace != null && mWorkspace.isOverlayShown()) {
+            mOverlayManager.hideOverlay(true);
+            return;
+        }
+        if (isInState(ALL_APPS)) {
+            getStateManager().goToState(NORMAL);
+            return;
+        }
+
         if (Utilities.ATLEAST_U) {
             getOnBackAnimationCallback().onBackInvoked();
         } else {

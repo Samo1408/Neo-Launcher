@@ -120,7 +120,12 @@ class OverlayCallbackImpl(val launcher: Launcher) : LauncherOverlayTouchProxy,
     override fun onOverlayMotionEvent(ev: MotionEvent?, scrollProgress: Float) {
         if (ev == null) return
         when (ev.actionMasked) {
-            MotionEvent.ACTION_DOWN -> launcherClient?.startScroll()
+            MotionEvent.ACTION_DOWN -> {
+                if (launcherClient != null && !launcherClient!!.isConnected) {
+                    launcherClient?.reconnect()
+                }
+                launcherClient?.startScroll()
+            }
             MotionEvent.ACTION_MOVE -> launcherClient?.setScroll(scrollProgress)
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> launcherClient?.endScroll()
         }
