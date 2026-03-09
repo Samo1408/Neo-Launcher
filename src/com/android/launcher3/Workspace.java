@@ -43,7 +43,6 @@ import static com.android.launcher3.config.FeatureFlags.FOLDABLE_SINGLE_PAGE;
 import static com.android.launcher3.logging.StatsLogManager.LAUNCHER_STATE_HOME;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SWIPELEFT;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SWIPERIGHT;
-
 import static java.util.Objects.requireNonNull;
 
 import android.animation.Animator;
@@ -148,8 +147,8 @@ import com.android.launcher3.widget.PendingAddWidgetInfo;
 import com.android.launcher3.widget.util.WidgetSizeHandler;
 import com.android.systemui.plugins.shared.LauncherOverlayManager.LauncherOverlayCallbacks;
 import com.android.systemui.plugins.shared.LauncherOverlayManager.LauncherOverlayTouchProxy;
-
 import com.google.android.msdl.data.model.MSDLToken;
+import com.neoapps.neolauncher.preferences.NeoPrefs;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -1353,6 +1352,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     public void showPageIndicatorAtCurrentScroll() {
         if (mPageIndicator != null) {
             mPageIndicator.setScroll(getScrollX(), computeMaxScroll());
+            boolean isHotseatEnabled = NeoPrefs.getInstance().getDockShow().getValue();
+            mPageIndicator.setVisibility(isHotseatEnabled ? VISIBLE : INVISIBLE);
         }
     }
 
