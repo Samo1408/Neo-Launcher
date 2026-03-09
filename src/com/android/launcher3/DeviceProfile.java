@@ -689,6 +689,11 @@ public class DeviceProfile {
                     + getHotseatProfile().getQsbVisualHeight()
                     + hotseatBarBottomSpacePx;
         }
+
+        boolean isHotseatEnabled = NeoPrefs.getInstance().getDockShow().getValue();
+        if (!isHotseatEnabled) {
+            hotseatBarSizePx = 0;
+        }
     }
 
     /**

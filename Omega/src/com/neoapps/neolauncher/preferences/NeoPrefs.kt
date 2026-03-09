@@ -508,11 +508,11 @@ class NeoPrefs private constructor(val context: Context) {
     )
 
     // Dock
-    var dockHide = BooleanPref(
+    var dockShow = BooleanPref(
         dataStore = dataStore,
         key = PrefKey.DOCK_ENABLED,
         titleId = R.string.title__dock_hide,
-        defaultValue = false,
+        defaultValue = true,
         onChange = { reloadGrid() }
     )
     var dockExpandable = BooleanPref(

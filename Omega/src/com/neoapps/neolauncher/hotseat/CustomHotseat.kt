@@ -46,7 +46,7 @@ open class CustomHotseat @JvmOverloads constructor(
     val prefs by lazy { NeoPrefs.getInstance() }
 
     private var backgroundEnable = false
-    private var hotseatDisabled = prefs.dockHide.getValue()
+    private var hotseatEnabled = prefs.dockShow.getValue()
     private var radius = context.resources.getDimension(R.dimen.enforced_rounded_corner_max_radius)
     private var defaultRadius = radius
 
@@ -60,24 +60,26 @@ open class CustomHotseat @JvmOverloads constructor(
     private var shadowBitmap = generateShadowBitmap()
 
     init {
-        if (hotseatDisabled) {
+        if (hotseatEnabled) {
+            super.setVisibility(VISIBLE)
+        } else {
             super.setVisibility(GONE)
         }
         setWillNotDraw(!backgroundEnable || launcher.deviceProfile.isVerticalBarLayout)
         combine(
             prefs.dockCustomBackground.get(),
             prefs.dockBackgroundColor.get(),
-            prefs.dockHide.get(),
+            prefs.dockShow.get(),
             prefs.profileWindowCornerRadius.get()
-        ) { customBackground, color, hide, dockRadius ->
+        ) { customBackground, color, show, dockRadius ->
             backgroundEnable = customBackground
             backgroundColor = AccentColorOption.fromString(color).accentColor
-            hotseatDisabled = hide
+            hotseatEnabled = show
             radius = dpToPx(if (dockRadius > -1) dockRadius else defaultRadius)
-            if (hotseatDisabled) {
-                super.setVisibility(GONE)
-            } else {
+            if (hotseatEnabled) {
                 super.setVisibility(VISIBLE)
+            } else {
+                super.setVisibility(GONE)
             }
             reload()
         }.launchIn(launcher.lifecycleScope)
@@ -91,7 +93,7 @@ open class CustomHotseat @JvmOverloads constructor(
     }
 
     override fun setVisibility(visibility: Int) {
-        if (!hotseatDisabled) {
+        if (hotseatEnabled) {
             super.setVisibility(visibility)
         }
     }
