@@ -22,13 +22,16 @@
 
     <color name="ic_allapps_background">#fffafafa</color>
 
-    <color name="system_accent2_50">#ffedeeff</color>
-
     <color name="all_apps_navbar_color">#28000000</color>
 
     <color name="system_neutral1_10">#fffbfbfb</color>
     <color name="system_neutral1_100">#ffe2e2e2</color>
     <color name="system_neutral1_900">#ff1b1b1b</color>
+    <color name="system_neutral1_500">#ff757575</color>
+
+    <color name="system_accent2_50">#ffedeeff</color>
+    <color name="system_accent1_100">#ffd3e3fd</color>
+    <color name="system_accent1_800">#ff062e6f</color>
 
     <color name="notification_background">#EB0854</color>
 

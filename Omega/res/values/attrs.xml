@@ -24,4 +24,10 @@
     <attr name="qsbEdgeRadius" format="dimension" />
     <attr name="smartspaceTitleTextSize" format="dimension" />
     <attr name="smartspaceSubtitleTextSize" format="dimension" />
+    <attr name="bottomSheetDragHandleColor" format="color" />
+    <attr name="allAppsSurfaceLow" format="color" />
+    <attr name="allAppsSurfaceHighest" format="color" />
+    <attr name="allAppsUnselectedTab" format="color" />
+    <attr name="privateSpaceSettingsColor" format="color" />
+    <attr name="privateSpaceDividerColor" format="color" />
 </resources>

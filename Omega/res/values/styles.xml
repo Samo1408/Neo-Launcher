@@ -271,5 +271,21 @@
         <item name="keyShadowOffsetY">@dimen/key_text_shadow_radius</item>
     </style>
 
+    <style name="AllAppsBlurStyle">
+        <item name="allAppsScrimColor">@color/shade_panel_scrim_color</item>
+        <item name="groupHighlight">@color/surface_effect_1</item>
+        <item name="focusHighlight">@color/surface_effect_2</item>
+        <item name="allAppsSurfaceLow">@color/surface_effect_0</item>
+        <item name="allAppsSurfaceHighest">@color/surface_effect_2</item>
+        <item name="allAppsUnselectedTab">@color/surface_effect_2</item>
+        <item name="allappsHeaderProtectionColor">@color/surface_effect_1</item>
+        <item name="privateSpaceSettingsColor">@color/surface_effect_2</item>
+        <item name="privateSpaceDividerColor">@color/surface_effect_3</item>
+        <item name="bottomSheetDragHandleColor">@color/materialColorOnSurface</item>
+    </style>
+
+    <!-- Currently All Apps fallback should only change the panel background color, but not
+    other surface effects. The background color is handled in ActivityAllAppsContainerView. -->
+    <style name="AllAppsBlurFallbackStyle" parent="AllAppsBlurStyle" />
 </resources>
 
