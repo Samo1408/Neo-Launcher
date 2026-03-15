@@ -30,6 +30,8 @@ import com.android.launcher3.allapps.AllAppsStore
 import com.android.launcher3.allapps.BaseAllAppsAdapter
 import com.android.launcher3.dagger.ActivityContextSingleton
 import com.android.launcher3.pm.UserCache
+import com.android.launcher3.recyclerview.AllAppsRecyclerViewPool.Companion.EXTRA_ICONS_COUNT
+import com.android.launcher3.recyclerview.AllAppsRecyclerViewPool.Companion.PREINFLATE_ICONS_ROW_COUNT
 import com.android.launcher3.util.AsyncObjectAllocator
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.SafeCloseable
@@ -191,8 +193,8 @@ constructor(
         private const val NULL_LAYOUT_MANAGER_ERROR_STRING =
             "activeRv's layoutManager should not be null"
 
-        private const val PREINFLATE_ICONS_ROW_COUNT = 4
-        private const val EXTRA_ICONS_COUNT = 2
+        private const val PREINFLATE_ICONS_ROW_COUNT = 8
+        private const val EXTRA_ICONS_COUNT = 4
 
         const val PRELOAD_ALL_APPS_DAGGER_KEY = "PRELOAD_ALL_APPS"
     }
