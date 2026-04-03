@@ -42,7 +42,7 @@ include(":utils")
 project(":utils").projectDir = File(rootDir, "libs_systemui/utils")
 
 include(":shared")
-project(":shared").projectDir = File(rootDir, "shared")
+project(":shared").projectDir = File(rootDir, "libs_systemui/shared")
 
 include(":concurrent")
 project(":concurrent").projectDir = File(rootDir, "modules/concurrent")

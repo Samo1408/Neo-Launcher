@@ -9,7 +9,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.neoapps.shared"
+    namespace = "com.android.systemui.shared"
     compileSdk = 36
     buildFeatures {
         aidl = true
