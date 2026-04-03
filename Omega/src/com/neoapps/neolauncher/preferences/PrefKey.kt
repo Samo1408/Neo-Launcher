@@ -88,6 +88,7 @@ object PrefKey {
 
     // Drawer
     val DRAWER_ICON_SCALE = floatPreferencesKey("drawer_icon_scale")
+    val DRAWER_APP_SUGGESTIONS = booleanPreferencesKey("drawer_app_suggestions")
     val DRAWER_LABELS_HIDE = booleanPreferencesKey("drawer_labels_hide")
     val DRAWER_LABELS_MULTILINE = booleanPreferencesKey("drawer_labels_multiline")
     val DRAWER_LABELS_SCALE = floatPreferencesKey("drawer_labels_scale")

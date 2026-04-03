@@ -73,6 +73,7 @@ fun DrawerPrefsPage() {
         mutableStateListOf(
             *listOfNotNull(
         //prefs.drawerGridSize,
+                prefs.drawerAppSuggestions,
         prefs.drawerSortMode,
                 prefs.drawerLayout,
                 if (prefs.drawerLayout.getValue() == LAYOUT_CATEGORIES) {

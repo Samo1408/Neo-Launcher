@@ -710,6 +710,16 @@ class NeoPrefs private constructor(val context: Context) {
         onChange = { reloadGrid() }
     )
 
+    val drawerAppSuggestions = BooleanPref(
+        dataStore = dataStore,
+        key = PrefKey.DRAWER_APP_SUGGESTIONS,
+        titleId = R.string.title_app_suggestions,
+        defaultValue = false,
+        onChange = {
+            reloadGrid()
+        }
+    )
+
     val drawerHideLabels = BooleanPref(
         dataStore = dataStore,
         key = PrefKey.DRAWER_LABELS_HIDE,
