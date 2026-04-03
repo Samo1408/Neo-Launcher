@@ -30,16 +30,18 @@ import com.android.launcher3.dragndrop.SystemDragControllerStub
 import com.android.launcher3.folder.FolderNameProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesNoOpProvider
 import com.android.launcher3.homescreenfiles.HomeScreenFilesProvider
+import com.android.launcher3.model.ModelDelegate
 import com.android.launcher3.popup.PopupDataProvider
 import com.android.launcher3.util.InstantAppResolver
 import com.android.launcher3.util.LooperExecutor
-import com.android.launcher3.util.ResourceBasedOverride.Overrides
+import com.android.launcher3.util.ResourceBasedOverride
 import com.android.launcher3.util.window.RefreshRateTracker
 import com.android.launcher3.util.window.RefreshRateTracker.RefreshRateTrackerImpl
 import com.android.launcher3.views.ActivityContext
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactory
 import com.android.launcher3.widget.LauncherWidgetHolder.WidgetHolderFactoryImpl
 import com.android.launcher3.widget.LocalColorExtractor
+import com.neoapps.neolauncher.allapps.NeoLauncherModelDelegate
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -49,7 +51,6 @@ import dagger.hilt.migration.DisableInstallInCheck
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-private object Modules {}
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -88,6 +89,12 @@ object SystemDragModule {
     fun provideSystemDragController(): SystemDragController = SystemDragControllerStub()
 }
 
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class PredictionAppModule {
+    @Binds
+    abstract fun bindModelDelegate(impl: NeoLauncherModelDelegate): ModelDelegate
+}
 
 // Module containing bindings for the final derivative app
 @Module
@@ -101,7 +108,7 @@ object AppModule {
     @Provides
     @LauncherAppSingleton
     fun provideMainProcessInitializer(@ApplicationContext context: Context): MainProcessInitializer =
-        Overrides.getObject(
+        ResourceBasedOverride.Overrides.getObject(
             MainProcessInitializer::class.java,
             context,
             R.string.main_process_initializer_class
