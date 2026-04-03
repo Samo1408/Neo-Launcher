@@ -18,6 +18,7 @@ package com.android.launcher3.pm
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
+import androidx.collection.LongSparseArray
 import com.android.launcher3.pm.UserCache.CachedUserInfo
 import com.android.launcher3.util.UserIconInfo
 
@@ -25,6 +26,15 @@ import com.android.launcher3.util.UserIconInfo
 class UserManagerState(private val userMap: Map<UserHandle, CachedUserInfo>) {
 
     private val userSerialMap = userMap.mapKeys { it.value.iconInfo.userSerial }
+
+    val allUsers = LongSparseArray<UserHandle>()
+
+    init {
+        for (user in userMap.keys) {
+            allUsers.put(user.hashCode().toLong(), user)
+        }
+    }
+
 
     /** Returns true if quiet mode is enabled for the provided user */
     fun isUserQuiet(serialNo: Long): Boolean = userSerialMap[serialNo]?.isQuietModeEnabled ?: false
