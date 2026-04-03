@@ -70,9 +70,9 @@ import com.android.launcher3.logger.LauncherAtom.HotseatContainer;
 import com.android.launcher3.logger.LauncherAtom.WorkspaceContainer;
 import com.android.launcher3.logging.StatsLogManager.EventEnum;
 import com.android.launcher3.pm.UserCache;
+import com.android.launcher3.quickstep.logging.StatsLogCompatManager.StatsLogConsumer;
 import com.android.launcher3.shortcuts.ShortcutRequest;
 import com.android.launcher3.util.UserIconInfo;
-import com.android.quickstep.logging.StatsLogCompatManager.StatsLogConsumer;
 import com.android.systemui.shared.system.SysUiStatsLog;
 
 import java.util.Locale;
