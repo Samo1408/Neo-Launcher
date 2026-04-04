@@ -133,7 +133,7 @@
     <string name="title_disabled">Aus</string>
     <string name="hotseat_show_page_indicator">Seitenindikator anzeigen</string>
     <string name="title_opacity">Deckkraft</string>
-    <string name="dock_colored_google">Farbige Symbole</string>
+    <string name="dock_colored_google">Farbsymbole</string>
     <string name="title__dock_show_arrow">Pfeil anzeigen</string>
     <string name="title__dock_hotseat_icons">Anzahl der Symbole</string>
     <string name="title__dock_colored_icons">Farbige Symbole</string>
@@ -327,7 +327,7 @@
     <string name="icu_abbrev_time_12h">hh:mm aa</string>
     <string name="summary__general_dock">Hotseat-Symbole, Suchleiste</string>
     <string name="title__general_smartspace">Start-Widget</string>
-    <string name="title__general_theme">Design</string>
+    <string name="title__general_theme">Thema</string>
     <string name="title__general_dock">Dock</string>
     <string name="gesture_press_home">Tippen auf die Home-Taste</string>
     <string name="title_separate_work_apps">Zweiter Tab für Apps im Arbeitsprofil</string>
@@ -443,7 +443,7 @@
     <string name="contributor_role">Beitragende(r)</string>
     <string name="accessibility_undo">Rückgängig</string>
     <string name="app_name">App-Name</string>
-    <string name="title__general_profile">Design</string>
+    <string name="title__general_profile">Profil</string>
     <string name="title__general_gestures_dash">Gesten &amp; Dash</string>
     <string name="title__general_search_feed">Suche &amp; Feed</string>
     <string name="pref_category__features">Funktionen</string>
@@ -505,13 +505,13 @@
     <string name="title_drawer_all_apps">Alle</string>
     <string name="title_all_apps_hide_scrollbar">Laufleiste ausblenden</string>
     <string name="title_drawer_horizontal">Horizontal</string>
-    <string name="title_drawer_categorized">Kategorisiert</string>
+    <string name="title_drawer_categorized">Vertikale Kategorien</string>
     <string name="title_drawer_custom_categories">Benutzerdefinierte Kategorien</string>
     <string name="title_smartspace_background">Zeige Farbschema-Hintergrund an</string>
     <string name="hotseat_show_dots_page_indicator">Seitenindikator mit Punkten anstelle von Linien anzeigen</string>
     <string name="search_provider_url_hint">Verwende %s anstatt des Suchbegriffs</string>
     <string name="search_provider_suggestion_url">URL für Suchvorschläge</string>
-    <string name="title_drawer_layout_categories">Layout Kategorien</string>
+    <string name="title_drawer_layout_categories">Kategorien verwalten</string>
     <string name="color_wallpaper_tertiary">Tertiäre Hintergrundfarbe</string>
     <string name="title_themed_background">Dem Farbschema angepasster Hintergrund</string>
     <string name="search_provider">Suchanbieter</string>
@@ -521,4 +521,22 @@
     <string name="add_search_provider">Suchanbieter hinzufügen</string>
     <string name="edit_search_provider">Suchanbieter bearbeiten</string>
     <string name="search_provider_search_url">URL der Suchmaschine</string>
+    <string name="title_manage_tabs">Tabs verwalten</string>
+    <string name="summary_manage_tabs">Tabs erstellen oder bearbeiten</string>
+    <string name="title_drawer_tabs">Horizontale Tabs</string>
+    <string name="category_business_and_productivity">Produktivität</string>
+    <string name="category_communication">Kommunikation</string>
+    <string name="category_entertainment">Unterhaltung</string>
+    <string name="category_game">Spiele</string>
+    <string name="category_health_and_fitness">Fitness</string>
+    <string name="category_knowledge_and_reference">Wissen</string>
+    <string name="category_music">Musik</string>
+    <string name="category_news">Nachrichten</string>
+    <string name="category_personalization">Personalisierung</string>
+    <string name="category_tools">Werkzeuge</string>
+    <string name="category_travel_and_navigation">Navigation</string>
+    <string name="trust_apps_unlock">Entsperren</string>
+    <string name="trust_apps_message">Für den Zugriff auf geschützte Apps ist eine Authentifizierung erforderlich</string>
+    <string name="title__about_acknowledgement">Danksagung</string>
+    <string name="category_art_and_design">Design</string>
 </resources>
