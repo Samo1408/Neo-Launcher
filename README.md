@@ -65,19 +65,11 @@ their TODOs and plans.
 
 ## Screenshots :framed_picture:
 
-TODO: update screenshots
+| <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/desktop_icons.png" alt="" width="330" align="center"> | <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/desktop_dash.png" alt="" width="330" align="center"> | <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/settings.png" alt="" width="330" align="center"> |
+|:--------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------:|
 
-<table>
-    <tr>
-        <td colspan="4"><img src="https://github.com/NeoApplications/Neo-Launcher/blob/main/snapshots/theme.png" alt="" width="512"></td>
-    </tr>
-    <tr>
-        <td><img src="snapshots/omega1.jpg" alt="" width="256"></td>
-        <td><img src="snapshots/omega3.jpg" alt="" width="256"></td>
-        <td><img src="snapshots/omega5.jpg" alt="" width="256"></td>
-        <td><img src="snapshots/omega7.jpg" alt="" width="256"></td>
-    </tr>
-</table>
+| <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/profile.png" alt="" width="330" align="center"> | <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/gestures.png" alt="" width="330" align="center"> | <img title="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/dash.png" alt="" width="330" align="center"> |
+|:-------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------:|
 
 ## Contributions
 
