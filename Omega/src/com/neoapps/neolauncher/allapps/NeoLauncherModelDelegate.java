@@ -206,6 +206,7 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
         }
 
         try {
+            assert mStatsManager != null;
             mStatsManager.setPullAtomCallback(
                     SysUiStatsLog.LAUNCHER_LAYOUT_SNAPSHOT,
                     null /* PullAtomMetadata */,
