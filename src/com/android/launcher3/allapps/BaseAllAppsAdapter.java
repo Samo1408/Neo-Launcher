@@ -38,7 +38,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.R;
-import com.android.launcher3.allapps.BaseAllAppsAdapter.ViewHolder;
 import com.android.launcher3.allapps.search.SearchAdapterProvider;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.popup.PopupContainerWithArrow;
@@ -287,8 +286,9 @@ public abstract class BaseAllAppsAdapter
                                 + " readyToAnimate: " + privateProfileManager.getReadyToAnimate()
                                 + " currentState: " + privateProfileManager.getCurrentState()
                                 + " currentAlpha: " + icon.getAlpha());
+			 */
                     }
-            */
+
                     // Views can still be bounded before the app list is updated hence showing icons
                     // after collapsing.
 
