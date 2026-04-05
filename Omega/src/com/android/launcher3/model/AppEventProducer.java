@@ -70,9 +70,9 @@ import com.android.launcher3.logger.LauncherAtom.HotseatContainer;
 import com.android.launcher3.logger.LauncherAtom.WorkspaceContainer;
 import com.android.launcher3.logging.StatsLogManager.EventEnum;
 import com.android.launcher3.pm.UserCache;
-import com.android.launcher3.quickstep.logging.StatsLogCompatManager.StatsLogConsumer;
 import com.android.launcher3.shortcuts.ShortcutRequest;
 import com.android.launcher3.util.UserIconInfo;
+import com.android.quickstep.logging.StatsLogCompatManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 
 import java.util.Locale;
@@ -82,7 +82,7 @@ import java.util.function.ObjIntConsumer;
 /**
  * Utility class to track stats log and emit corresponding app events
  */
-public class AppEventProducer implements StatsLogConsumer {
+public class AppEventProducer implements StatsLogCompatManager.StatsLogConsumer {
 
     private static final int MSG_LAUNCH = 0;
 
