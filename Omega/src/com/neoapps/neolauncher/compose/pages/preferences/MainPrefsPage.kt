@@ -18,6 +18,7 @@
 
 package com.neoapps.neolauncher.compose.pages.preferences
 
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
@@ -49,7 +50,6 @@ import androidx.compose.ui.unit.dp
 import com.android.launcher3.BuildConfig
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
-import com.neoapps.neolauncher.changeDefaultHome
 import com.neoapps.neolauncher.compose.components.OverflowMenu
 import com.neoapps.neolauncher.compose.components.ViewWithActionBar
 import com.neoapps.neolauncher.compose.components.plus
@@ -129,7 +129,10 @@ fun MainPrefsPage() {
                         if (BuildConfig.APPLICATION_ID != resolveDefaultHome()) {
                             DropdownMenuItem(
                                 onClick = {
-                                    changeDefaultHome(context)
+                                    Intent(android.provider.Settings.ACTION_HOME_SETTINGS)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        .let { context.startActivity(it) }
+                                    (context as? Activity)?.finish()
                                     hideMenu()
                                 },
                                 text = { Text(text = stringResource(id = R.string.change_default_home)) }
