@@ -66,6 +66,7 @@ public class PreviewBackground extends DelegatedCellDrawing {
 
     @VisibleForTesting protected static final float HOVER_SCALE = 1.1f;
     @VisibleForTesting protected static final int HOVER_ANIMATION_DURATION = 300;
+    private static final float ACCEPT_COLOR_MULTIPLIER = 1.5f;
 
     private final Context mContext;
     private final PorterDuffXfermode mShadowPorterDuffXfermode
@@ -78,6 +79,7 @@ public class PreviewBackground extends DelegatedCellDrawing {
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     float mScale = 1f;
+    private float mColorMultiplier = 1f;
     private int mBgColor;
     private int mStrokeColor;
     private float mStrokeWidth;
@@ -240,6 +242,10 @@ public class PreviewBackground extends DelegatedCellDrawing {
     void setInvalidateDelegate(View invalidateDelegate) {
         mInvalidateDelegate = invalidateDelegate;
         invalidate();
+    }
+
+    public void setStartOpacity(float opacity) {
+        mColorMultiplier = opacity;
     }
 
     public int getBgColor() {
@@ -410,6 +416,8 @@ public class PreviewBackground extends DelegatedCellDrawing {
             mScaleAnimator.cancel();
         }
 
+        final float startBGMultiplier = mColorMultiplier;
+        final float endBGMultiplier = ACCEPT_COLOR_MULTIPLIER;
         final float startScale = mScale;
         final float endScale = isAccepting ? ACCEPT_SCALE_FACTOR : (isHovered ? HOVER_SCALE : 1f);
         Interpolator interpolator =
@@ -431,6 +439,7 @@ public class PreviewBackground extends DelegatedCellDrawing {
         mScaleAnimator.addUpdateListener(animation -> {
             float prog = animation.getAnimatedFraction();
             mScale = prog * endScale + (1 - prog) * startScale;
+            mColorMultiplier = prog * endBGMultiplier + (1 - prog) * startBGMultiplier;
             invalidate();
         });
         mScaleAnimator.addListener(new AnimatorListenerAdapter() {

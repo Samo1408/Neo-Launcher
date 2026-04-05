@@ -28,11 +28,14 @@ import static com.android.launcher3.logger.LauncherAtom.Attribute.MANUAL_LABEL;
 import static com.android.launcher3.logger.LauncherAtom.Attribute.SUGGESTED_LABEL;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.LauncherSettings;
+import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderNameInfos;
 import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logger.LauncherAtom.Attribute;
@@ -57,6 +60,8 @@ public class FolderInfo extends CollectionInfo {
     public static final int FLAG_MULTI_PAGE_ANIMATION = 0x00000004;
 
     public static final int FLAG_MANUAL_FOLDER_NAME = 0x00000008;
+
+    public static final int FLAG_COVER_MODE = 0x00000010;
 
     /**
      * Different states of folder label.
@@ -155,6 +160,44 @@ public class FolderInfo extends CollectionInfo {
         }
         if (writer != null && oldOptions != options) {
             writer.updateItemInDatabase(this);
+        }
+    }
+
+    public boolean isCoverMode() {
+        return hasOption(FLAG_COVER_MODE);
+    }
+
+    public void setCoverMode(boolean enable, ModelWriter modelWriter) {
+        setOption(FLAG_COVER_MODE, enable, modelWriter);
+        onIconChanged();
+    }
+
+    @Nullable
+    public WorkspaceItemInfo getCoverInfo() {
+        for (ItemInfo item : getContents()) {
+            if (item instanceof WorkspaceItemInfo wii) return wii;
+        }
+        return null;
+    }
+
+    public Drawable getIcon(Context context) {
+        if (isCoverMode()) {
+            WorkspaceItemInfo cover = getCoverInfo();
+            return cover != null ? cover.newIcon(context) : null;
+        }
+        return null;
+    }
+
+    public CharSequence getIconTitle(Folder folder) {
+        if (!isCoverMode()) {
+            if (!TextUtils.equals(folder.getDefaultFolderName(), title)) {
+                return title;
+            } else {
+                return folder.getDefaultFolderName();
+            }
+        } else {
+            WorkspaceItemInfo info = getCoverInfo();
+            return info.title;
         }
     }
 
@@ -315,6 +358,10 @@ public class FolderInfo extends CollectionInfo {
         return LauncherAtom.ToState.TO_STATE_UNSPECIFIED;
     }
 
+    public boolean useIconMode(Context context) {
+        return isCoverMode();
+    }
+
     /**
      * Checks if {@code itemType} is a type that can be placed in folders.
      */
@@ -322,5 +369,23 @@ public class FolderInfo extends CollectionInfo {
         return itemType == ITEM_TYPE_APPLICATION
                 || itemType == ITEM_TYPE_DEEP_SHORTCUT
                 || itemType == ITEM_TYPE_APP_PAIR;
+    }
+
+    public interface CoverModeListener {
+        void onIconChanged();
+    }
+
+    private final ArrayList<CoverModeListener> mCoverListeners = new ArrayList<>();
+
+    public void addCoverModeListener(CoverModeListener listener) {
+        mCoverListeners.add(listener);
+    }
+
+    public void removeCoverModeListener(CoverModeListener listener) {
+        mCoverListeners.remove(listener);
+    }
+
+    public void onIconChanged() {
+        for (CoverModeListener l : mCoverListeners) l.onIconChanged();
     }
 }

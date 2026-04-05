@@ -42,6 +42,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -65,6 +66,7 @@ import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -113,6 +115,9 @@ import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.BaseDragLayer;
 import com.android.launcher3.views.ClipPathView;
 import com.android.launcher3.widget.PendingAddShortcutInfo;
+import com.neoapps.neolauncher.folder.FolderShortcut;
+import com.neoapps.neolauncher.groups.category.DrawerFolderInfo;
+import com.neoapps.neolauncher.preferences.NeoPrefs;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -267,6 +272,9 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
 
     private final @NonNull GradientDrawable mBackground;
 
+    private final NeoPrefs prefs;
+    private final Launcher mLauncher;
+
     /**
      * Used to inflate the Workspace from XML.
      *
@@ -291,6 +299,9 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
                 ResourcesCompat.getDrawable(getResources(),
                         R.drawable.round_rect_folder, getContext().getTheme()));
         mBackground.setCallback(this);
+
+        prefs = NeoPrefs.getInstance();
+        mLauncher = Launcher.getLauncher(context);
     }
 
     @Override
@@ -340,6 +351,22 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
                     mContent.getCurrentPage() + 1));
             mLeftArrow.setOnClickListener(v -> mContent.snapToPage(
                     mContent.getCurrentPage() - 1));
+        }
+
+        ImageView settingsButton = findViewById(R.id.settings_button);
+        settingsButton.setColorFilter(prefs.getProfileAccentColor().getColor(), PorterDuff.Mode.SRC_IN);
+        if (prefs.getDesktopLock().getValue()) {
+            settingsButton.setVisibility(View.GONE);
+        } else {
+            settingsButton.setOnClickListener(v -> {
+                animateClosed();
+                if (mInfo instanceof DrawerFolderInfo) {
+                    ((DrawerFolderInfo) mInfo).showEdit(mLauncher);
+                } else {
+                    FolderShortcut fc = new FolderShortcut(mLauncher, mInfo);
+                    fc.show();
+                }
+            });
         }
     }
 
@@ -1835,6 +1862,10 @@ public class Folder extends AbstractFloatingView implements ClipPathView, DragSo
     public void setClipPath(Path clipPath) {
         mClipPath = clipPath;
         invalidate();
+    }
+
+    public String getDefaultFolderName() {
+        return mFolderName.getText().toString();
     }
 
     @Override

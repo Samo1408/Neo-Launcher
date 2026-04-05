@@ -81,6 +81,7 @@ import com.android.launcher3.dot.DotInfo;
 import com.android.launcher3.dragndrop.DragOptions.PreDragCondition;
 import com.android.launcher3.dragndrop.DraggableView;
 import com.android.launcher3.folder.FolderIcon;
+import com.android.launcher3.graphics.IconPalette;
 import com.android.launcher3.graphics.PreloadIconDelegate;
 import com.android.launcher3.graphics.ThemeManager;
 import com.android.launcher3.icons.BitmapInfo.DrawableCreationFlags;
@@ -1516,12 +1517,27 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         }
     }
 
+    public void applyIcon(ItemInfoWithIcon info) {
+        FastBitmapDrawable iconDrawable = info.newIcon(getContext());
+        if (prefs.getNotificationCustomColor().getValue()) {
+            mDotParams.setDotColor(prefs.getNotificationBackground().getColor());
+        } else {
+            mDotParams.setDotColor(IconPalette.getMutedColor(info.bitmap.color, 0.54f));
+        }
+        setIcon(iconDrawable);
+    }
+
     private void updateIcon(Drawable newIcon) {
         if (mLayoutHorizontal) {
             setCompoundDrawablesRelative(newIcon, null, null, null);
         } else {
             setCompoundDrawables(null, newIcon, null, null);
         }
+    }
+
+    public void clearIcon() {
+        mIcon = null;
+        setCompoundDrawables(null, null, null, null);
     }
 
     private String getAppLabelPluralString(String appName, int notificationCount) {

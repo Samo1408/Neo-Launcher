@@ -19,17 +19,35 @@
 package com.neoapps.neolauncher.folder
 
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.android.launcher3.Launcher
 import com.android.launcher3.LauncherAppState
+import com.android.launcher3.R
 import com.android.launcher3.model.data.FolderInfo
 import com.android.launcher3.model.data.ItemInfo
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import com.neoapps.neolauncher.compose.components.ComposeSwitchView
 
 @Composable
 fun CustomizeFolderSheet(
@@ -37,7 +55,6 @@ fun CustomizeFolderSheet(
     folder: FolderInfo,
     onClose: () -> Unit,
 ) {
-
     val context = LocalContext.current
 
     val infoProvider: CustomInfoProvider<ItemInfo> =
@@ -79,12 +96,12 @@ fun CustomizeFolderView(
     onTitleChange: (String) -> Unit,
     defaultTitle: String,
 ) {
-    /*val keyboardController = LocalSoftwareKeyboardController.current
+    //val keyboardController = LocalSoftwareKeyboardController.current
     val coverMode = remember { mutableStateOf(folder.isCoverMode) }
-    val swipeUpHandler = createGestureHandler(
+    /*val swipeUpHandler = createGestureHandler(
         launcher, folder.swipeUpAction, BlankGestureHandler(launcher, null)
     )
-    val handlerName = remember { mutableStateOf(swipeUpHandler.displayName) }
+    val handlerName = remember { mutableStateOf(swipeUpHandler.displayName) }*/
 
     Column(
         modifier = Modifier
@@ -112,7 +129,7 @@ fun CustomizeFolderView(
             )
         }
 
-        OutlinedTextField(
+        /*OutlinedTextField(
             value = title,
             onValueChange = onTitleChange,
             modifier = Modifier
@@ -144,7 +161,7 @@ fun CustomizeFolderView(
             shape = MaterialTheme.shapes.large,
             label = { Text(text = stringResource(id = R.string.folder_name)) },
             isError = title.isEmpty()
-        )
+        )*/
 
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -154,14 +171,14 @@ fun CustomizeFolderView(
                 summary = stringResource(R.string.folder_cover_mode_desc),
                 isChecked = folder.isCoverMode,
                 index = 0,
-                groupSize = 2,
+                groupSize = 1,
                 onCheckedChange = { newValue ->
                     folder.setCoverMode(newValue, launcher.modelWriter)
                     coverMode.value = newValue
                 }
             )
 
-            val openDialogCustom = remember { mutableStateOf(false) }
+            /*val openDialogCustom = remember { mutableStateOf(false) }
             PreferenceItem(
                 title = stringResource(R.string.gesture_swipe_up),
                 summary = handlerName.value,
@@ -179,7 +196,7 @@ fun CustomizeFolderView(
                         handlerName.value = it.displayName
                     }
                 )
-            }
+            }*/
         }
-    }*/
+    }
 }
