@@ -54,6 +54,7 @@ object PrefKey {
     val DESKTOP_LABELS_HIDE = booleanPreferencesKey("desktop_labels_hide")
     val DESKTOP_LABELS_MULTILINE = booleanPreferencesKey("desktop_labels_multiline")
     val DESKTOP_FREE_SCROLLING = booleanPreferencesKey("desktop_free_scrolling")
+    val DESKTOP_CYCLE_SCROLLING = booleanPreferencesKey("desktop_cycle_scrolling")
     val DESKTOP_LABELS_SCALE = floatPreferencesKey("desktop_labels_scale")
     val DESKTOP_POPUP_OPTIONS = stringSetPreferencesKey("desktop_popup_options")
     val DESKTOP_GRID_COLUMNS = intPreferencesKey("desktop_grid_columns")
@@ -150,6 +151,7 @@ object PrefKey {
     val SEARCH_DOCK_ENABLED = booleanPreferencesKey("search_bar_dock_enable")
 
     // Feed
+    val FEED_ENABLE = booleanPreferencesKey("feed_enabled")
     val FEED_PROVIDER = stringPreferencesKey("feed_provider")
 
     // Gestures

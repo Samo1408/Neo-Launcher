@@ -508,6 +508,14 @@ class NeoPrefs private constructor(val context: Context) {
         onChange = { recreate() },
     )
 
+    val desktopCycleScrolling = BooleanPref(
+        dataStore = dataStore,
+        key = PrefKey.DESKTOP_CYCLE_SCROLLING,
+        titleId = R.string.title_desktop_cycle_scrolling,
+        defaultValue = false,
+        onChange = { recreate() },
+    )
+
     // Dock
     var dockShow = BooleanPref(
         dataStore = dataStore,
@@ -1146,6 +1154,13 @@ class NeoPrefs private constructor(val context: Context) {
         dataStore = dataStore,
         key = PrefKey.SEARCH_CONTACTS_ENABLED,
         titleId = R.string.title_search_contacts,
+        defaultValue = false,
+    )
+
+    var feedEnable = BooleanPref(
+        dataStore = dataStore,
+        key = PrefKey.FEED_ENABLE,
+        titleId = R.string.title_enable_feed,
         defaultValue = false,
     )
 
