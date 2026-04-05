@@ -524,7 +524,7 @@
     <string name="color_wallpaper_tertiary">Sfondo terziario</string>
     <string name="title_drawer_all_apps">Tutto</string>
     <string name="title_drawer_horizontal">Orizzontale</string>
-    <string name="title_drawer_categorized">Classificato</string>
+    <string name="title_drawer_categorized">Categorie verticali</string>
     <string name="title_smartspace_background">Mostra sfondo a tema</string>
     <string name="search_provider">Fornitore di ricerca</string>
     <string name="web_search_provider">Fornitore di ricerca Web</string>
@@ -536,5 +536,24 @@
     <string name="search_provider_url_hint">Usa %s al posto del termine di ricerca</string>
     <string name="edit_search_provider">Modifica motore di ricerca</string>
     <string name="search_provider_search_url">URL di ricerca</string>
-    <string name="title_drawer_layout_categories">Categorie di layout</string>
+    <string name="title_drawer_layout_categories">Gestisci categorie</string>
+    <string name="title_manage_tabs">Gestisci schede</string>
+    <string name="summary_manage_tabs">Crea o modifica schede</string>
+    <string name="title_drawer_tabs">Schede orizzontali</string>
+    <string name="category_art_and_design">Design</string>
+    <string name="category_business_and_productivity">Produttività</string>
+    <string name="category_communication">Comunicazione</string>
+    <string name="category_entertainment">Divertimento</string>
+    <string name="category_game">Giochi</string>
+    <string name="category_health_and_fitness">Fitness</string>
+    <string name="category_lifestyle">Stile di vita</string>
+    <string name="category_knowledge_and_reference">Conoscenza</string>
+    <string name="category_music">Musica</string>
+    <string name="category_news">Notizie</string>
+    <string name="category_personalization">Personalizzazione</string>
+    <string name="category_tools">Strumenti</string>
+    <string name="category_travel_and_navigation">Navigazione</string>
+    <string name="trust_apps_unlock">Sblocca</string>
+    <string name="trust_apps_message">Autenticazione necessaria per accedere alle app protette</string>
+    <string name="title__about_acknowledgement">Riconoscimento</string>
 </resources>
