@@ -115,6 +115,19 @@ public class AppInfo extends ItemInfoWithIcon implements WorkspaceItemFactory {
                 .getDominantColor(0);
     }
 
+    public AppInfo(LauncherActivityInfo info, UserIconInfo userIconInfo,
+                   ApiWrapper apiWrapper, PackageManagerHelper pmHelper, boolean quietModeEnabled) {
+        this.componentName = info.getComponentName();
+        this.container = CONTAINER_ALL_APPS;
+        this.user = userIconInfo.user;
+        intent = makeLaunchIntent(info);
+
+        if (quietModeEnabled) {
+            runtimeStatusFlags |= FLAG_DISABLED_QUIET_USER;
+        }
+        uid = info.getApplicationInfo().uid;
+        updateRuntimeFlagsForActivityTarget(this, info, userIconInfo, apiWrapper, pmHelper);
+    }
     public AppInfo(AppInfo info) {
         super(info);
         componentName = info.componentName;
