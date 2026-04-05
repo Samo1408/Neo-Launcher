@@ -327,7 +327,7 @@
     <string name="icu_abbrev_time_12h">hh:mm aa</string>
     <string name="summary__general_dock">Hotseat-Symbole, Suchleiste</string>
     <string name="title__general_smartspace">Start-Widget</string>
-    <string name="title__general_theme">Thema</string>
+    <string name="title__general_theme">Design</string>
     <string name="title__general_dock">Dock</string>
     <string name="gesture_press_home">Tippen auf die Home-Taste</string>
     <string name="title_separate_work_apps">Zweiter Tab für Apps im Arbeitsprofil</string>
