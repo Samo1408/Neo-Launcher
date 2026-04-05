@@ -71,6 +71,7 @@ fun DesktopPrefsPage() {
         prefs.desktopIconAddInstalled,
         //prefs.desktopAllowFullWidthWidgets,
         //prefs.desktopWidgetCornerRadius
+        prefs.desktopCycleScrolling
     )
     val folderPrefs = remember(prefs.changePoker.collectAsState(initial = 1).value) {
         mutableStateListOf(
