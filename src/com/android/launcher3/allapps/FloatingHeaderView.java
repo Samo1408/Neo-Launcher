@@ -21,7 +21,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -89,8 +88,6 @@ public class FloatingHeaderView extends LinearLayout implements
     private final int mTabsAdditionalPaddingBottom;
 
     protected PersonalWorkSlidingTabStrip mTabLayout;
-    private AllAppsRecyclerView mMainRV;
-    private AllAppsRecyclerView mWorkRV;
     private SearchRecyclerView mSearchRV;
     private AllAppsRecyclerView mCurrentRV;
     protected int mSnappedScrolledY;
@@ -270,11 +267,10 @@ public class FloatingHeaderView extends LinearLayout implements
         if (mCurrentRV != null) {
             mCurrentRV.removeOnScrollListener(mOnScrollListener);
         }
-        if (!isSearch || mSearchRV == null)
-            mCurrentRV = mRVs.get(Math.min(active, mRVs.size() - 1));
-        else mCurrentRV = mSearchRV;
+        mCurrentRV = mRVs.get(Math.min(active, mRVs.size() - 1));
         mCurrentRV.addOnScrollListener(mOnScrollListener);
-        //maybeSetTabVisibility(rvType == AdapterHolder.SEARCH ? GONE : VISIBLE);
+        maybeSetTabVisibility(isSearch ? GONE : VISIBLE);
+
     }
 
     /** Update tab visibility to the given state, only if tabs are active (work profile exists). */
@@ -282,10 +278,17 @@ public class FloatingHeaderView extends LinearLayout implements
         mTabLayout.setVisibility(mTabsHidden ? GONE : visibility);
     }
 
+    /**
+     * Returns whether search bar has multi-line support, and is currently in multi-line state.
+     */
+    private boolean isSearchBarMultiline() {
+        return Flags.multilineSearchBar() && mSearchBarOffset > 0;
+    }
+
     private void updateExpectedHeight() {
         updateFloatingRowsHeight();
         mMaxTranslation = 0;
-        boolean shouldAddSearchBarHeight = mSearchBarOffset > 0 && !Flags.floatingSearchBar();
+        boolean shouldAddSearchBarHeight = isSearchBarMultiline() && !Flags.floatingSearchBar();
         if (shouldAddSearchBarHeight) {
             mMaxTranslation += mSearchBarOffset;
         }
@@ -441,6 +444,9 @@ public class FloatingHeaderView extends LinearLayout implements
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (mCurrentRV == null || !mCurrentRV.isAttachedToWindow() || mCurrentRV.getParent() == null) {
+            return super.onInterceptTouchEvent(ev);
+        }
         calcOffset(mTempOffset);
         ev.offsetLocation(mTempOffset.x, mTempOffset.y);
         mForwardToRecyclerView = mCurrentRV.onInterceptTouchEvent(ev);
@@ -448,20 +454,10 @@ public class FloatingHeaderView extends LinearLayout implements
         return mForwardToRecyclerView || super.onInterceptTouchEvent(ev);
     }
 
-    private boolean isEventOverView(View view, MotionEvent ev) {
-        if (view == null || view.getVisibility() != VISIBLE) {
-            return false;
-        }
-        int[] xy = new int[2];
-        view.getLocationOnScreen(xy);
-        RectF rect = new RectF(xy[0], xy[1], xy[0] + view.getWidth(), xy[1] + view.getHeight());
-        return rect.contains(ev.getRawX(), ev.getRawY());
-    }
-
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mForwardToRecyclerView) {
+        if (mForwardToRecyclerView && mCurrentRV != null && mCurrentRV.isAttachedToWindow()
+                && mCurrentRV.getParent() != null) {
             // take this view's and parent view's (view pager) location into account
             calcOffset(mTempOffset);
             event.offsetLocation(mTempOffset.x, mTempOffset.y);
@@ -476,8 +472,17 @@ public class FloatingHeaderView extends LinearLayout implements
     }
 
     private void calcOffset(Point p) {
-        //p.x = getLeft() - mCurrentRV.getLeft() - ((ViewGroup) mCurrentRV.getParent()).getLeft();
-        //p.y = getTop() - mCurrentRV.getTop() - ((ViewGroup) mCurrentRV.getParent()).getTop();
+        p.set(0, 0);
+        if (mCurrentRV == null) {
+            return;
+        }
+        p.x = getLeft() - mCurrentRV.getLeft();
+        p.y = getTop() - mCurrentRV.getTop();
+        if (mCurrentRV.getParent() instanceof View) {
+            View parent = (View) mCurrentRV.getParent();
+            p.x -= parent.getLeft();
+            p.y -= parent.getTop();
+        }
     }
 
     @Override
