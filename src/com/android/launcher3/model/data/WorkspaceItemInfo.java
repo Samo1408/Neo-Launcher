@@ -21,22 +21,26 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
-import android.graphics.Bitmap;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.Flags;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.icons.IconCache;
+import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.shortcuts.ShortcutKey;
-import com.android.launcher3.uioverrides.ApiWrapper;
+import com.android.launcher3.util.ApiWrapper;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.ContentWriter;
-import com.saggitt.omega.data.GestureItemInfoRepository;
-import com.saggitt.omega.data.models.GestureItemInfo;
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
+import com.neoapps.neolauncher.data.GestureItemInfoRepository;
+import com.neoapps.neolauncher.data.models.GestureItemInfo;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -80,6 +84,12 @@ public class WorkspaceItemInfo extends ItemInfoWithIcon {
     public static final int FLAG_START_FOR_RESULT = 1 << 4;
 
     /**
+     * Used to indicate that the icon bitmap in the restored Launcher db file is full-bleed and not
+     * cropped.
+     */
+    public static final int FLAG_RESTORED_FULL_BLEED = 1 << 5;
+
+    /**
      * The intent used to start the application.
      */
     @NonNull
@@ -101,8 +111,9 @@ public class WorkspaceItemInfo extends ItemInfoWithIcon {
 
     public int options;
     public String swipeUpAction;
-    public CharSequence customTitle;
-    public Bitmap customIcon;
+
+    @Nullable
+    private ShortcutInfo mShortcutInfo = null;
 
     public WorkspaceItemInfo() {
         itemType = LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
@@ -129,6 +140,11 @@ public class WorkspaceItemInfo extends ItemInfoWithIcon {
     public WorkspaceItemInfo(ShortcutInfo shortcutInfo, Context context) {
         user = shortcutInfo.getUserHandle();
         itemType = Favorites.ITEM_TYPE_DEEP_SHORTCUT;
+        if (Flags.privateSpaceRestrictAccessibilityDrag()) {
+            if (UserCache.INSTANCE.get(context).getUserInfo(user).isPrivate()) {
+                runtimeStatusFlags |= FLAG_NOT_PINNABLE;
+            }
+        }
         updateFromDeepShortcutInfo(shortcutInfo, context);
     }
 
@@ -140,7 +156,7 @@ public class WorkspaceItemInfo extends ItemInfoWithIcon {
                 .put(Favorites.OPTIONS, options)
                 .put(Favorites.RESTORED, status);
 
-        if (!usingLowResIcon()) {
+        if (!getMatchingLookupFlag().useLowRes()) {
             writer.putIcon(bitmap, user);
         }
     }
@@ -157,15 +173,34 @@ public class WorkspaceItemInfo extends ItemInfoWithIcon {
 
 
     public final boolean isPromise() {
-        return hasStatusFlag(FLAG_RESTORED_ICON | FLAG_AUTOINSTALL_ICON);
+        return hasStatusFlag(FLAG_RESTORED_ICON | FLAG_AUTOINSTALL_ICON)
+                // For archived apps, promise icons are always ready to be displayed.
+                || isArchived();
     }
 
+    /**
+     * Returns true if the workspace item supports promise icon UI. There are a few cases where they
+     * are supported:
+     * 1. Icons to be restored via backup/restore.
+     * 2. Icons added as an auto-install app.
+     * 3. Icons added due to it being an active install session created by the user.
+     * 4. Icons for archived apps.
+     */
     public boolean hasPromiseIconUi() {
         return isPromise() && !hasStatusFlag(FLAG_SUPPORTS_WEB_UI);
     }
 
+    @Override
+    public boolean supportsCustomShapes(@BitmapInfo.DrawableCreationFlags int creationFlags) {
+        return !(isArchived() && !hasStatusFlag(FLAG_RESTORED_FULL_BLEED))
+                && super.supportsCustomShapes(creationFlags);
+    }
+
     public void updateFromDeepShortcutInfo(@NonNull final ShortcutInfo shortcutInfo,
             @NonNull final Context context) {
+        if (BubbleAnythingFlagHelper.enableCreateAnyBubble()) {
+            mShortcutInfo = shortcutInfo;
+        }
         // {@link ShortcutInfo#getActivity} can change during an update. Recreate the intent
         intent = ShortcutKey.makeIntent(shortcutInfo);
         title = shortcutInfo.getShortLabel();
@@ -174,23 +209,36 @@ public class WorkspaceItemInfo extends ItemInfoWithIcon {
         if (TextUtils.isEmpty(label)) {
             label = shortcutInfo.getShortLabel();
         }
-        contentDescription = context.getPackageManager().getUserBadgedLabel(label, user);
+        try {
+            contentDescription = context.getPackageManager().getUserBadgedLabel(label, user);
+        } catch (SecurityException e) {
+            contentDescription = null;
+            Log.e(TAG, "Failed to get content description", e);
+        }
+
         if (shortcutInfo.isEnabled()) {
             runtimeStatusFlags &= ~FLAG_DISABLED_BY_PUBLISHER;
         } else {
+            Log.w(TAG, "updateFromDeepShortcutInfo: Updated shortcut has been disabled. "
+                    + " package=" + shortcutInfo.getPackage()
+                    + " disabledReason=" + shortcutInfo.getDisabledReason());
             runtimeStatusFlags |= FLAG_DISABLED_BY_PUBLISHER;
         }
-        disabledMessage = shortcutInfo.getDisabledMessage();
-        if (Utilities.ATLEAST_P
-                && shortcutInfo.getDisabledReason() == ShortcutInfo.DISABLED_REASON_VERSION_LOWER) {
+
+        if (shortcutInfo.getDisabledReason() == ShortcutInfo.DISABLED_REASON_VERSION_LOWER) {
             runtimeStatusFlags |= FLAG_DISABLED_VERSION_LOWER;
         } else {
             runtimeStatusFlags &= ~FLAG_DISABLED_VERSION_LOWER;
         }
 
-        Person[] persons = ApiWrapper.getPersons(shortcutInfo);
+        Person[] persons = ApiWrapper.INSTANCE.get(context).getPersons(shortcutInfo);
         personKeys = persons.length == 0 ? Utilities.EMPTY_STRING_ARRAY
             : Arrays.stream(persons).map(Person::getKey).sorted().toArray(String[]::new);
+    }
+
+    @Nullable
+    public ShortcutInfo getDeepShortcutInfo() {
+        return mShortcutInfo;
     }
 
     /**
@@ -230,9 +278,7 @@ public class WorkspaceItemInfo extends ItemInfoWithIcon {
         return new WorkspaceItemInfo(this);
     }
 
-    public void setTitle(@NotNull Context context, @Nullable String title) {
 
-    }
 
     public String getSwipeUpAction(Context context) {
         GestureItemInfoRepository repository = new GestureItemInfoRepository(context);
