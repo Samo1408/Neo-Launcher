@@ -505,7 +505,7 @@ class NeoPrefs private constructor(val context: Context) {
         key = PrefKey.DESKTOP_FREE_SCROLLING,
         titleId = R.string.title_desktop_free_scrolling,
         defaultValue = false,
-        onChange = { recreate() },
+        onChange = { },
     )
 
     val desktopCycleScrolling = BooleanPref(
@@ -513,7 +513,7 @@ class NeoPrefs private constructor(val context: Context) {
         key = PrefKey.DESKTOP_CYCLE_SCROLLING,
         titleId = R.string.title_desktop_cycle_scrolling,
         defaultValue = false,
-        onChange = { recreate() },
+        onChange = { },
     )
 
     // Dock

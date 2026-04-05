@@ -257,9 +257,6 @@ fun MainPrefsPage() {
                         is NavRoute.Backup
                             -> BackupsPrefsPage()
 
-                        is NavRoute.Dev.Categorize
-                            -> AppCategoriesPage()
-
                         is NavRoute.Dev
                             -> DevPrefsPage()
 

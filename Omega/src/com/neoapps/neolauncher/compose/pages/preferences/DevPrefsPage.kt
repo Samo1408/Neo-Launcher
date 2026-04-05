@@ -23,9 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,16 +48,12 @@ fun DevPrefsPage() {
         openDialog.value = true
     }
 
-    val developerPrefs = remember(prefs.changePoker.collectAsState(initial = 1).value) {
-        mutableStateListOf(
-            listOfNotNull(
+    val developerPrefs = listOf(
                 prefs.restartLauncher,
                 prefs.developerOptionsEnabled,
-                /*prefs.showDebugInfo,
-                prefs.desktopFreeScrolling,*/
-            ).toTypedArray()
+        prefs.showDebugInfo,
+        prefs.desktopFreeScrolling
         )
-    }
 
     ViewWithActionBar(
         title = stringResource(R.string.developer_options_title)

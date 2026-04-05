@@ -78,8 +78,7 @@ open class NavRoute : Parcelable {
 
     @Serializable
     open class Dev : NavRoute() {
-        @Serializable
-        class Categorize : Dev()
+
     }
 
     @Serializable
