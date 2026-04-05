@@ -16,8 +16,6 @@
 
 package com.android.launcher3.appprediction;
 
-import static com.android.launcher3.util.OnboardingPrefs.ALL_APPS_VISITED_COUNT;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -89,7 +87,8 @@ public class AppsDividerView extends View implements FloatingHeaderRow {
         mAllAppsLabelTextColor = context.getColor(R.color.materialColorOnSurfaceVariant);
 
         mAccessibilityManager = AccessibilityManager.getInstance(context);
-        setShowAllAppsLabel(!ALL_APPS_VISITED_COUNT.hasReachedMax(context));
+        //setShowAllAppsLabel(!ALL_APPS_VISITED_COUNT.hasReachedMax(context));
+        setShowAllAppsLabel(false);
     }
 
     public void setup(FloatingHeaderView parent, FloatingHeaderRow[] rows, boolean tabsHidden) {

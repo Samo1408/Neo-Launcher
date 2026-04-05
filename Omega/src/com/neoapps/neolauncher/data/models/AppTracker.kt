@@ -19,10 +19,12 @@
 package com.neoapps.neolauncher.data.models
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity
+@Entity(primaryKeys = ["packageName"])
 data class AppTracker(
-    @PrimaryKey val packageName: String,
+    val packageName: String,
+    val userSerialNumber: Long? = -1,
     val count: Int,
+    val lastOpened: Long? = System.currentTimeMillis(),
 )
+

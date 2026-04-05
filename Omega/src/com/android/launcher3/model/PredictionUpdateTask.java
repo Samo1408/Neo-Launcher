@@ -37,9 +37,12 @@ import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.model.BgDataModel.FixedContainerItems;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.model.data.PredictedContainerInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -69,11 +72,16 @@ public class PredictionUpdateTask implements ModelUpdateTask {
         // TODO: remove this
         LauncherPrefs.get(context).put(LAST_PREDICTION_ENABLED, !mTargets.isEmpty());
 
-        Set<UserHandle> usersForChangedShortcuts =
-                dataModel.extraItems.get(mPredictorState.containerId).items.stream()
-                        .filter(info -> info.itemType == ITEM_TYPE_DEEP_SHORTCUT)
-                        .map(info -> info.user)
-                        .collect(Collectors.toSet());
+        FixedContainerItems fixedContainerItems = dataModel.extraItems.get(mPredictorState.containerId);
+        Set<UserHandle> usersForChangedShortcuts;
+        if (fixedContainerItems != null) {
+            usersForChangedShortcuts = fixedContainerItems.items.stream()
+                    .filter(info -> info.itemType == ITEM_TYPE_DEEP_SHORTCUT)
+                    .map(info -> info.user)
+                    .collect(Collectors.toSet());
+        } else {
+            usersForChangedShortcuts = new HashSet<>();
+        }
 
         List<ItemInfo> items = new ArrayList<>(mTargets.size());
         for (AppTarget target : mTargets) {
@@ -117,12 +125,12 @@ public class PredictionUpdateTask implements ModelUpdateTask {
             items.add(itemInfo);
         }
 
-        FixedContainerItems fci = new FixedContainerItems(mPredictorState.containerId, items);
-        dataModel.extraItems.put(fci.containerId, fci);
-        taskController.bindExtraContainerItems(fci);
+        PredictedContainerInfo fci = new PredictedContainerInfo(mPredictorState.containerId, items);
+        dataModel.updateAndDispatchItem(fci /* item */, null /* owner */);
+        taskController.bindUpdatedWorkspaceItems(Collections.singleton(fci));
         usersForChangedShortcuts.forEach(u -> dataModel.updateShortcutPinnedState(context, u));
 
         // Save to disk
-        mPredictorState.storage.write(context, fci.items);
+        mPredictorState.storage.write(context, fci.getContents());
     }
 }

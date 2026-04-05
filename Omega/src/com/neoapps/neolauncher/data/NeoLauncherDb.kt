@@ -49,7 +49,7 @@ import org.koin.java.KoinJavaComponent.getKoin
         GestureItemInfo::class,
         SearchProvider::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(
@@ -70,6 +70,10 @@ import org.koin.java.KoinJavaComponent.getKoin
             from = 5,
             to = 7,
             spec = NeoLauncherDb.Companion.MigrationSpec5to7::class
+        ),
+        AutoMigration(
+            from = 7,
+            to = 8,
         ),
     ]
 )

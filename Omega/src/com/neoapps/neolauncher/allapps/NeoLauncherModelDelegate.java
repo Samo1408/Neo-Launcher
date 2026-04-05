@@ -28,7 +28,6 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_WIDGETS
 import static com.android.launcher3.LauncherSettings.Favorites.DESKTOP_ICON_FLAG;
 import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
 import static com.android.launcher3.model.PredictionHelper.getBundleForHotseatPredictions;
-import static com.android.launcher3.model.PredictionHelper.getBundleForWidgetPredictions;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 
 import android.app.StatsManager;
@@ -37,7 +36,6 @@ import android.app.prediction.AppTargetEvent;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.StatsEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -49,7 +47,6 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.dagger.ApplicationContext;
-import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.InstanceIdSequence;
 import com.android.launcher3.model.AppEventProducer;
@@ -57,7 +54,6 @@ import com.android.launcher3.model.ModelDelegate;
 import com.android.launcher3.model.PredictedItemFactory;
 import com.android.launcher3.model.PredictionUpdateTask;
 import com.android.launcher3.model.PredictorState;
-import com.android.launcher3.model.WidgetsPredictionUpdateTask;
 import com.android.launcher3.model.data.CollectionInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.PredictedContainerInfo;
@@ -66,10 +62,12 @@ import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.util.IntSparseArrayMap;
 import com.android.quickstep.logging.StatsLogCompatManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.neoapps.neolauncher.data.AppTrackerRepository;
+import com.neoapps.neolauncher.data.models.AppTracker;
 import com.neoapps.neolauncher.preferences.NeoPrefs;
-import com.neoapps.neolauncher.util.Permissions;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -191,55 +189,9 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
             prefs.put(LAST_SNAPSHOT_TIME_MILLIS, now);
         }
 
-        registerSnapshotLoggingCallback();
     }
 
     protected void additionalSnapshotEvents(InstanceId snapshotInstanceId) {
-    }
-
-    /**
-     * Registers a callback to log launcher workspace layout using Statsd pulled atom.
-     */
-    private void registerSnapshotLoggingCallback() {
-        if (mStatsManager == null) {
-            Log.d(TAG, "Skipping snapshot logging");
-        }
-
-        try {
-            assert mStatsManager != null;
-            mStatsManager.setPullAtomCallback(
-                    SysUiStatsLog.LAUNCHER_LAYOUT_SNAPSHOT,
-                    null /* PullAtomMetadata */,
-                    MODEL_EXECUTOR,
-                    (i, eventList) -> {
-                        InstanceId instanceId = new InstanceIdSequence().newInstanceId();
-                        WorkspaceData itemsIdMap;
-                        synchronized (mDataModel) {
-                            itemsIdMap = mDataModel.itemsIdMap.copy();
-                        }
-
-                        for (ItemInfo info : itemsIdMap) {
-                            CollectionInfo parent = getContainer(info, itemsIdMap);
-                            LauncherAtom.ItemInfo itemInfo = info.buildProto(parent, mContext);
-                            Log.d(TAG, itemInfo.toString());
-                            StatsEvent statsEvent = StatsLogCompatManager.buildStatsEvent(itemInfo,
-                                    instanceId);
-                            eventList.add(statsEvent);
-                        }
-                        Log.d(TAG,
-                                String.format(
-                                        "Successfully logged %d workspace items with instanceId=%d",
-                                        eventList.size(), instanceId.getId()));
-                        additionalSnapshotEvents(instanceId);
-                        //SettingsChangeLogger.INSTANCE.get(mContext).logSnapshot(instanceId);
-                        return StatsManager.PULL_SUCCESS;
-                    }
-            );
-            Log.d(TAG, "Successfully registered for launcher snapshot logging!");
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Failed to register launcher snapshot logging callback with StatsManager",
-                    e);
-        }
     }
 
     private static CollectionInfo getContainer(
@@ -292,50 +244,49 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
         }
     }
 
-    private boolean hasPermission() {
-        return Permissions.hasUsageAccessPermission(mContext);
-    }
-
     @WorkerThread
     private void recreatePredictors() {
         boolean predictionsEnabled = NeoPrefs.getInstance().getDrawerAppSuggestions().getValue();
 
-        if (!hasPermission() || !predictionsEnabled)
+        if (!predictionsEnabled)
             return;
 
-        destroyPredictors();
-        if (!mActive) {
-            return;
-        }
-        Log.d(TAG, "Creando Predictions");
-        mAllPredictionAppsState.registerPredictor(mContext,
-                new AppPredictionContext.Builder(mContext)
-                        .setUiSurface("home")
-                        .setPredictedTargetCount(mIDP.numDatabaseAllAppsColumns)
-                        .build(),
-                mModel,
-                PredictionUpdateTask::new);
+        refreshLocalPredictions();
+    }
 
+    public void refreshLocalPredictions() {
+        boolean predictionsEnabled = NeoPrefs.getInstance().getDrawerAppSuggestions().getValue();
+        if (!predictionsEnabled) return;
 
-        // TODO: get bundle
-        registerHotseatPredictor(mContext);
+        MODEL_EXECUTOR.execute(() -> {
+            AppTrackerRepository repo = AppTrackerRepository.Companion.getINSTANCE().get(mContext);
+            List<AppTracker> recentApps = repo.getRecentApps(mIDP.numDatabaseAllAppsColumns);
+            List<android.app.prediction.AppTarget> targets = new ArrayList<>();
+            android.content.pm.LauncherApps launcherApps = mContext.getSystemService(android.content.pm.LauncherApps.class);
 
-        if (!Flags.enableWidgetPickerRefactor()) {
-            mWidgetsRecommendationState.registerPredictor(mContext,
-                    new AppPredictionContext.Builder(mContext)
-                            .setUiSurface("widgets")
-                            .setExtras(getBundleForWidgetPredictions(mContext, mDataModel))
-                            .setPredictedTargetCount(NUM_OF_RECOMMENDED_WIDGETS_PREDICATION)
-                            .build(),
-                    mModel,
-                    WidgetsPredictionUpdateTask::new);
-        }
+            for (AppTracker app : recentApps) {
+                android.os.UserHandle user = mUserCache.getUserForSerialNumber(app.getUserSerialNumber());
+                if (user != null) {
+                    List<android.content.pm.LauncherActivityInfo> activities = launcherApps.getActivityList(app.getPackageName(), user);
+                    if (!activities.isEmpty()) {
+                        android.content.pm.LauncherActivityInfo activity = activities.get(0);
+                        targets.add(new android.app.prediction.AppTarget.Builder(
+                                new android.app.prediction.AppTargetId(app.getPackageName()),
+                                activity.getComponentName().getPackageName(),
+                                user)
+                                .setClassName(activity.getComponentName().getClassName())
+                                .build());
+                    }
+                }
+            }
+            mModel.enqueueModelUpdateTask(new PredictionUpdateTask(mAllPredictionAppsState, targets));
+        });
     }
 
     @WorkerThread
     private void recreateHotseatPredictor() {
         mHotseatPredictionState.destroyPredictor();
-        if (mActive && hasPermission()) {
+        if (mActive) {
             registerHotseatPredictor(mContext);
         }
     }

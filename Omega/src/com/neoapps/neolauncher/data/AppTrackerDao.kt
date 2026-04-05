@@ -31,14 +31,17 @@ interface AppTrackerDao {
     @Query("SELECT * FROM apptracker")
     fun getAppCount(): List<AppTracker>
 
-    @Query("DELETE FROM apptracker WHERE packageName = :packageName")
-    suspend fun deleteAppCount(packageName: String)
+    @Query("SELECT * FROM apptracker ORDER BY lastOpened DESC LIMIT :limit")
+    fun getRecentApps(limit: Int): List<AppTracker>
 
-    @Query("SELECT count FROM apptracker WHERE packageName = :packageName")
-    fun getAppCount(packageName: String): Int
+    @Query("DELETE FROM apptracker WHERE packageName = :packageName AND userSerialNumber = :userSerialNumber")
+    suspend fun deleteAppCount(packageName: String, userSerialNumber: Long)
 
-    @Query("SELECT EXISTS(SELECT * FROM apptracker WHERE packageName = :packageName)")
-    fun appExist(packageName: String): Boolean
+    @Query("SELECT count FROM apptracker WHERE packageName = :packageName AND userSerialNumber = :userSerialNumber")
+    fun getAppCount(packageName: String, userSerialNumber: Long): Int
+
+    @Query("SELECT EXISTS(SELECT * FROM apptracker WHERE packageName = :packageName AND userSerialNumber = :userSerialNumber)")
+    fun appExist(packageName: String, userSerialNumber: Long): Boolean
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(appTracker: AppTracker)

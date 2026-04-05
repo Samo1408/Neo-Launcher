@@ -20,6 +20,9 @@
 package com.neoapps.neolauncher.data
 
 import android.content.Context
+import android.os.Process
+import android.os.UserHandle
+import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.MainThreadInitializedObject
 import com.neoapps.neolauncher.data.models.AppTracker
 import kotlinx.coroutines.CoroutineName
@@ -28,9 +31,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 
-class AppTrackerRepository(context: Context) {
+class AppTrackerRepository(private val context: Context) {
     private val scope = CoroutineScope(Dispatchers.IO) + CoroutineName("AppTrackerRepository")
     private val dao = NeoLauncherDb.INSTANCE.get(context).appTrackerDao()
+    private val userCache = UserCache.INSTANCE.get(context)
 
     var appCountList: List<AppTracker> = listOf()
 
@@ -47,21 +51,26 @@ class AppTrackerRepository(context: Context) {
         return appCountList
     }
 
-    fun updateAppCount(packageName: String) {
-        scope.launch {
-            //Check if the app is already in the database
-            if (dao.appExist(packageName)) {
-                //If it is, update the count
-                val currentCount = dao.getAppCount(packageName)
-                dao.update(AppTracker(packageName, currentCount + 1))
-            } else {
-                dao.insert(AppTracker(packageName, 1))
-            }
+    fun getRecentApps(limit: Int): List<AppTracker> {
+        return dao.getRecentApps(limit)
+    }
+
+    fun updateAppCount(packageName: String, user: UserHandle = Process.myUserHandle()) {
+        val userSerialNumber = userCache.getSerialNumberForUser(user)
+        val timestamp = System.currentTimeMillis()
+        //Check if the app is already in the database
+        if (dao.appExist(packageName, userSerialNumber)) {
+            //If it is, update the count
+            val currentCount = dao.getAppCount(packageName, userSerialNumber)
+            dao.update(AppTracker(packageName, userSerialNumber, currentCount + 1, timestamp))
+        } else {
+            dao.insert(AppTracker(packageName, userSerialNumber, 1, timestamp))
         }
     }
 
-    fun deleteAppCount(packageName: String) {
-        scope.launch { dao.deleteAppCount(packageName) }
+    fun deleteAppCount(packageName: String, user: UserHandle = Process.myUserHandle()) {
+        val userSerialNumber = userCache.getSerialNumberForUser(user)
+        scope.launch { dao.deleteAppCount(packageName, userSerialNumber) }
     }
 
     companion object {

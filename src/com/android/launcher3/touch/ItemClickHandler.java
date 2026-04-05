@@ -29,6 +29,7 @@ import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
@@ -406,8 +407,7 @@ public class ItemClickHandler {
         boolean isProtected = false;
         NeoLauncher myLauncher = (NeoLauncher) launcher;
         NeoPrefs prefs = NeoPrefs.getInstance();
-        if (item instanceof WorkspaceItemInfo) {
-            WorkspaceItemInfo si = (WorkspaceItemInfo) item;
+        if (item instanceof WorkspaceItemInfo si) {
             if (si.hasStatusFlag(WorkspaceItemInfo.FLAG_SUPPORTS_WEB_UI)
                     && Intent.ACTION_VIEW.equals(intent.getAction())) {
                 // make a copy of the intent that has the package set to null
@@ -431,15 +431,23 @@ public class ItemClickHandler {
             isProtected = Config.Companion.isAppProtected(launcher.getApplicationContext(),
                     ((AppInfo) item).toComponentKey()) &&
                     prefs.getDrawerEnableProtectedApps().getValue();
-            MODEL_EXECUTOR.execute(() -> {
+        }
+
+        MODEL_EXECUTOR.execute(() -> {
+            ComponentName component = item.getTargetComponent();
+            if (component != null) {
+                AppTrackerRepository repository = AppTrackerRepository.Companion.getINSTANCE().get(launcher.getApplicationContext());
+                repository.updateAppCount(component.getPackageName(), item.user);
                 if (prefs.getDrawerSortMode().getValue() == Config.SORT_MOST_USED) {
-                    AppTrackerRepository repository = AppTrackerRepository.Companion.getINSTANCE().get(launcher.getApplicationContext());
-                    assert ((AppInfo) item).componentName != null;
-                    repository.updateAppCount(((AppInfo) item).componentName.getPackageName());
                     prefs.getReloadGrid().invoke();
                 }
-            });
-        }
+                if (prefs.getDrawerAppSuggestions().getValue()) {
+                    launcher.getModel().getModelDelegate().refreshLocalPredictions();
+                }
+            }
+        });
+
+
         if (v != null && launcher.supportsAdaptiveIconAnimation(v)
                 && !item.shouldUseBackgroundAnimation()) {
             // Preload the icon to reduce latency b/w swapping the floating view with the original.

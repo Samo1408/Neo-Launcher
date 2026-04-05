@@ -76,11 +76,6 @@ fun DrawerPrefsPage() {
             *listOfNotNull(
         //prefs.drawerGridSize,
                 prefs.drawerAppSuggestions,
-                if (prefs.drawerAppSuggestions.getValue() && !prefs.drawerAppSuggestionsPermission.getter()) {
-                    prefs.drawerAppSuggestionsPermission
-                } else {
-                    null
-                },
         prefs.drawerSortMode,
                 prefs.drawerLayout,
                 if (prefs.drawerLayout.getValue() == LAYOUT_CATEGORIES) {
