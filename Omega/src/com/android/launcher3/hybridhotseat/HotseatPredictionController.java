@@ -107,6 +107,7 @@ public class HotseatPredictionController implements
         return new Intent(SETTINGS_ACTION).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
+
     /**
      * Enables/disabled the hotseat prediction icon long press edu for testing.
      */

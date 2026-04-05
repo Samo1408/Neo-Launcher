@@ -48,14 +48,26 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.android.launcher3.AppFilter
 import com.android.launcher3.BaseActivity
 import com.android.launcher3.Launcher
+import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APPS_PREDICTION
+import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION
+import com.android.launcher3.LauncherSettings.Favorites.CONTAINER_WIDGETS_PREDICTION
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION
+import com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
+import com.android.launcher3.LauncherState.ALL_APPS
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
+import com.android.launcher3.appprediction.PredictionRowView
+import com.android.launcher3.hybridhotseat.HotseatPredictionController
+import com.android.launcher3.logging.InstanceId
+import com.android.launcher3.logging.StatsLogManager
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.model.data.ItemInfo
+import com.android.launcher3.model.data.PredictedContainerInfo
 import com.android.launcher3.pm.UserCache
 import com.android.launcher3.popup.SystemShortcut
 import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
+import com.android.launcher3.util.RunnableList
 import com.android.launcher3.util.TouchController
 import com.android.launcher3.views.OptionsPopupView
 import com.android.systemui.plugins.shared.LauncherOverlayManager
@@ -73,6 +85,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import java.util.Objects
+import java.util.function.Predicate
 import java.util.stream.Stream
 
 class NeoLauncher : Launcher(), SavedStateRegistryOwner,
@@ -94,12 +108,17 @@ class NeoLauncher : Launcher(), SavedStateRegistryOwner,
     override val savedStateRegistry: SavedStateRegistry
         get() = savedStateRegistryController.savedStateRegistry
 
+    var allAppsPredictions: PredictedContainerInfo =
+        PredictedContainerInfo(CONTAINER_ALL_APPS_PREDICTION, emptyList())
+
+    private lateinit var mHotseatPredictionController: HotseatPredictionController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         if (!this.hasStoragePermission) {
             Permissions.requestPermission(
-            this,
-            android.Manifest.permission.READ_EXTERNAL_STORAGE,
-            Permissions.REQUEST_PERMISSION_STORAGE_ACCESS
+                this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                Permissions.REQUEST_PERMISSION_STORAGE_ACCESS
             )
         }
 
@@ -138,6 +157,79 @@ class NeoLauncher : Launcher(), SavedStateRegistryOwner,
                 packageName
             ), true
         )
+    }
+
+    override fun setupViews() {
+        super.setupViews()
+        mHotseatPredictionController = HotseatPredictionController(this);
+    }
+
+    override fun bindPredictedContainerInfo(info: PredictedContainerInfo?) {
+        super.bindPredictedContainerInfo(info)
+        if (info == null) return
+        when (info.id) {
+            CONTAINER_ALL_APPS_PREDICTION -> {
+                allAppsPredictions = info
+                appsView.floatingHeaderView.findFixedRowByType(PredictionRowView::class.java)
+                    .setPredictedApps(info.getContents())
+            }
+
+            CONTAINER_HOTSEAT_PREDICTION -> {
+                mHotseatPredictionController.setPredictedItems(info)
+            }
+
+            CONTAINER_WIDGETS_PREDICTION -> {
+                widgetPickerDataProvider.setWidgetRecommendations(info.getContents())
+            }
+        }
+    }
+
+    fun onItemPinnedFromContextMenu() {
+        mHotseatPredictionController.onItemPinnedFromContextMenu()
+    }
+
+
+    override fun bindWorkspaceComponentsRemoved(matcher: Predicate<ItemInfo?>) {
+        super.bindWorkspaceComponentsRemoved(matcher)
+        mHotseatPredictionController.onModelItemsRemoved(matcher)
+    }
+
+    override fun logAppLaunch(
+        statsLogManager: StatsLogManager,
+        info: ItemInfo,
+        instanceId: InstanceId
+    ) {
+        // If the app launch is from any of the surfaces in AllApps then add the InstanceId from
+        // LiveSearchManager to recreate the AllApps session on the server side.
+
+        var instanceId = instanceId
+        if (mAllAppsSessionLogId != null && ALL_APPS.equals(
+                stateManager.getCurrentStableState()
+            )
+        ) {
+            instanceId = mAllAppsSessionLogId;
+        }
+
+        val logger = statsLogManager.logger().withItemInfo(info).withInstanceId(instanceId);
+
+        if (info.itemType == ITEM_TYPE_APPLICATION
+            || info.itemType == ITEM_TYPE_DEEP_SHORTCUT
+        ) {
+            val items = allAppsPredictions.getContents()
+            val count = items.size
+            for (i in 0 until count) {
+                val targetInfo = items[i]
+                if (targetInfo.itemType == info.itemType
+                    && targetInfo.user == info.user
+                    && Objects.equals(targetInfo.intent, info.intent)
+                ) {
+                    logger.withRank(i)
+                    break
+                }
+            }
+        }
+        logger.log(StatsLogManager.LauncherEvent.LAUNCHER_APP_LAUNCH_TAP);
+
     }
 
     override fun onThemeChanged(forceUpdate: Boolean) = recreate()
@@ -221,6 +313,22 @@ class NeoLauncher : Launcher(), SavedStateRegistryOwner,
 
         }
 
+
+    override fun startActivitySafely(v: View?, intent: Intent?, item: ItemInfo?): RunnableList? {
+        val predictionRowView =
+            appsView.floatingHeaderView.findFixedRowByType(PredictionRowView::class.java)
+        predictionRowView.setPredictionUiUpdatePaused(true)
+        val result = super.startActivitySafely(v, intent, item)
+        if (result == null) {
+            predictionRowView.setPredictionUiUpdatePaused(false)
+        } else {
+            result.add {
+                predictionRowView.setPredictionUiUpdatePaused(false)
+            }
+        }
+        return result
+    }
+
     fun startActivitySafelyAuth(v: View?, intent: Intent, itemInfo: ItemInfo) {
         Config.showLockScreen(this, getString(R.string.trust_apps_manager_name)) {
             startActivitySafely(v, intent, itemInfo)
@@ -261,6 +369,7 @@ class NeoLauncher : Launcher(), SavedStateRegistryOwner,
         return Stream.concat(
             super.getSupportedShortcuts(itemInfo),
             Stream.of(
+                mHotseatPredictionController,
                 OmegaShortcuts.CUSTOMIZE,
                 OmegaShortcuts.APP_UNINSTALL
             )

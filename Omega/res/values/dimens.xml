@@ -84,4 +84,9 @@
     <dimen name="hotseat_top_row_height">36dp</dimen>
     <dimen name="hotseat_settings_button_padding_x">24dp</dimen>
     <dimen name="hotseat_settings_button_padding_y">12dp</dimen>
+
+    <dimen name="all_apps_prediction_row_divider_height">17dp</dimen>
+    <dimen name="all_apps_label_top_padding">16dp</dimen>
+    <dimen name="all_apps_label_bottom_padding">8dp</dimen>
+    <dimen name="all_apps_label_text_size">14sp</dimen>
 </resources>

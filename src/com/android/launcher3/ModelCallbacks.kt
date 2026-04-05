@@ -29,9 +29,7 @@ import com.android.launcher3.popup.PopupContainer
 import com.android.launcher3.util.Executors
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
 import com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR
-import com.android.launcher3.util.IntArray as LIntArray
 import com.android.launcher3.util.IntArray
-import com.android.launcher3.util.IntSet as LIntSet
 import com.android.launcher3.util.IntSet
 import com.android.launcher3.util.ItemInfoMatcher
 import com.android.launcher3.util.PackageUserKey
@@ -45,6 +43,8 @@ import java.util.concurrent.CompletionStage
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicReference
 import java.util.function.Predicate
+import com.android.launcher3.util.IntArray as LIntArray
+import com.android.launcher3.util.IntSet as LIntSet
 
 class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
 
@@ -230,6 +230,12 @@ class ModelCallbacks(private var launcher: Launcher) : BgDataModel.Callbacks {
 
     override fun bindAllWidgets(widgets: List<WidgetsListBaseEntry>) {
         launcher.widgetPickerDataProvider.setWidgets(widgets)
+    }
+
+    override fun bindExtraContainerItems(item: BgDataModel.FixedContainerItems) {
+        if (item is PredictedContainerInfo) {
+            launcher.bindPredictedContainerInfo(item)
+        }
     }
 
     /** Returns the ids of the workspaces to bind. */

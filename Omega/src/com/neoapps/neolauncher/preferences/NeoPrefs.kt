@@ -68,6 +68,7 @@ import com.neoapps.neolauncher.smartspace.weather.GoogleWeatherProvider
 import com.neoapps.neolauncher.smartspace.weather.OWMWeatherProvider
 import com.neoapps.neolauncher.util.Config
 import com.neoapps.neolauncher.util.CustomPreferencesMigration
+import com.neoapps.neolauncher.util.Permissions
 import com.neoapps.neolauncher.util.getFeedProviders
 import com.neoapps.neolauncher.util.languageOptions
 import kotlinx.coroutines.CoroutineName
@@ -717,6 +718,21 @@ class NeoPrefs private constructor(val context: Context) {
         defaultValue = false,
         onChange = {
             reloadGrid()
+            pokeChange()
+        }
+    )
+
+    val drawerAppSuggestionsPermission = IntentLauncherPref(
+        dataStore = dataStore,
+        key = PrefKey.DRAWER_APP_SUGGESTIONS_PERMISSION,
+        titleId = R.string.needs_usage_access,
+        summaryId = R.string.summary_drawer_app_suggestions_permission,
+        positiveAnswerId = R.string.title_change_settings,
+        defaultValue = false,
+        getter = { Permissions.hasUsageAccessPermission(context) },
+        intent = {
+            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
     )
 

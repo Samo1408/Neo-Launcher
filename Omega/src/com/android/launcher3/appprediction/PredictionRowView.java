@@ -72,7 +72,7 @@ public class PredictionRowView<T extends Context & ActivityContext>
 
     private FloatingHeaderView mParent;
 
-    private boolean mPredictionsEnabled = false;
+    private boolean mPredictionsEnabled = true;
 
     private boolean mPredictionUiUpdatePaused = false;
 
@@ -182,10 +182,8 @@ public class PredictionRowView<T extends Context & ActivityContext>
 
     /**
      * Sets the current set of predicted apps.
-     * <p>
      * This can be called before we get the full set of applications, we should merge the results
      * only in onPredictionsUpdated() which is idempotent.
-     * <p>
      * If the number of predicted apps is the same as the previous list of predicted apps,
      * we can optimize by swapping them in place.
      */

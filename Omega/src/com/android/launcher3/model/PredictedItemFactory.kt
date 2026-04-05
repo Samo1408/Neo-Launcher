@@ -28,6 +28,7 @@ import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
 import android.os.UserHandle
 import android.os.UserManager
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.launcher3.LauncherModel
 import com.android.launcher3.LauncherModel.ModelUpdateTask
@@ -145,37 +146,62 @@ class PredictorState(
         val apm = ctx.getSystemService(AppPredictionManager::class.java) ?: return
         lastTargets = emptyList()
 
-        predictor =
-            apm.createAppPredictionSession(predictionContext).apply {
-                registerPredictionUpdates(MODEL_EXECUTOR) {
-                    val oldTargets = lastTargets
-                    lastTargets = it
+        try {
+            predictor =
+                apm.createAppPredictionSession(predictionContext).apply {
+                    registerPredictionUpdates(MODEL_EXECUTOR) {
+                        val oldTargets = lastTargets
+                        lastTargets = it
 
-                    // If no diff, skip
-                    if (
-                        oldTargets.size != lastTargets.size ||
-                        oldTargets.zip(lastTargets).any { (a1, a2) ->
-                            !areAppTargetsSame(a1, a2)
+                        // If no diff, skip
+                        if (
+                            oldTargets.size != lastTargets.size ||
+                            oldTargets.zip(lastTargets).any { (a1, a2) ->
+                                !areAppTargetsSame(a1, a2)
+                            }
+                        ) {
+                            model.enqueueModelUpdateTask(
+                                taskFactory.invoke(
+                                    this@PredictorState,
+                                    it
+                                )
+                            )
                         }
-                    ) {
-                        model.enqueueModelUpdateTask(taskFactory.invoke(this@PredictorState, it))
                     }
+                    requestPredictionUpdate()
                 }
-                requestPredictionUpdate()
-            }
+        } catch (e: SecurityException) {
+            Log.e("PredictorState", "Failed to create predictor", e)
+        }
     }
 
     /** Destroys a previously created predictor */
     fun destroyPredictor() {
-        predictor?.destroy()
+        try {
+            predictor?.destroy()
+        } catch (e: SecurityException) {
+            Log.e("PredictorState", "Failed to destroy predictor", e)
+        }
         predictor = null
     }
 
     /** see [AppPredictor.requestPredictionUpdate] */
-    fun requestPredictionUpdate() = predictor?.requestPredictionUpdate()
+    fun requestPredictionUpdate() {
+        try {
+            predictor?.requestPredictionUpdate()
+        } catch (e: SecurityException) {
+            Log.e("PredictorState", "Failed to request prediction update", e)
+        }
+    }
 
     /** see [AppPredictor.notifyAppTargetEvent] */
-    fun notifyAppTargetEvent(event: AppTargetEvent) = predictor?.notifyAppTargetEvent(event)
+    fun notifyAppTargetEvent(event: AppTargetEvent) {
+        try {
+            predictor?.notifyAppTargetEvent(event)
+        } catch (e: SecurityException) {
+            Log.e("PredictorState", "Failed to notify app target event", e)
+        }
+    }
 
     /** Compares two targets for the properties which we care about */
     private fun areAppTargetsSame(t1: AppTarget, t2: AppTarget): Boolean {

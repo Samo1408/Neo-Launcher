@@ -32,7 +32,6 @@ import com.android.launcher3.model.ItemInstallQueue
 import com.android.launcher3.model.LoaderTask
 import com.android.launcher3.model.LoaderTask.LoaderTaskFactory
 import com.android.launcher3.model.ModelDbController
-import com.android.launcher3.model.ModelDelegate
 import com.android.launcher3.model.ModelInitializer
 import com.android.launcher3.model.ModelLauncherCallbacks
 import com.android.launcher3.model.ModelTaskController
@@ -45,6 +44,7 @@ import com.android.launcher3.pm.UserCache
 import com.android.launcher3.util.DaggerSingletonTracker
 import com.android.launcher3.util.Executors.MODEL_EXECUTOR
 import com.android.launcher3.util.PackageUserKey
+import com.neoapps.neolauncher.allapps.NeoLauncherModelDelegate
 import java.io.PrintWriter
 import java.util.concurrent.CancellationException
 import java.util.function.Consumer
@@ -69,7 +69,7 @@ constructor(
     @Named("ICONS_DB") dbFileName: String?,
     initializer: ModelInitializer,
     lifecycle: DaggerSingletonTracker,
-    val modelDelegate: ModelDelegate,
+    val modelDelegate: NeoLauncherModelDelegate,
     private val mBgAllAppsList: AllAppsList,
     private val mBgDataModel: BgDataModel,
     private val loaderFactory: LoaderTaskFactory,
