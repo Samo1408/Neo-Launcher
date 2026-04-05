@@ -63,9 +63,11 @@ import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.PredictedContainerInfo;
 import com.android.launcher3.model.data.WorkspaceData;
 import com.android.launcher3.pm.UserCache;
-import com.android.launcher3.quickstep.logging.StatsLogCompatManager;
 import com.android.launcher3.util.IntSparseArrayMap;
+import com.android.quickstep.logging.StatsLogCompatManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.neoapps.neolauncher.preferences.NeoPrefs;
+import com.neoapps.neolauncher.util.Permissions;
 
 import java.util.ArrayList;
 
@@ -108,7 +110,6 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
                                     PredictedItemFactory.Factory itemParserFactory,
                                     @Nullable @Named("ICONS_DB") String dbFileName) {
         super(context);
-
 
         mIDP = idp;
         mUserCache = userCache;
@@ -290,13 +291,22 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
         }
     }
 
+    private boolean hasPermission() {
+        return Permissions.hasUsageAccessPermission(mContext);
+    }
+
     @WorkerThread
     private void recreatePredictors() {
+        boolean predictionsEnabled = NeoPrefs.getInstance().getDrawerAppSuggestions().getValue();
+
+        if (!hasPermission() || !predictionsEnabled)
+            return;
+
         destroyPredictors();
         if (!mActive) {
             return;
         }
-
+        Log.d(TAG, "Creando Predictions");
         mAllPredictionAppsState.registerPredictor(mContext,
                 new AppPredictionContext.Builder(mContext)
                         .setUiSurface("home")
@@ -324,7 +334,7 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
     @WorkerThread
     private void recreateHotseatPredictor() {
         mHotseatPredictionState.destroyPredictor();
-        if (mActive) {
+        if (mActive && hasPermission()) {
             registerHotseatPredictor(mContext);
         }
     }
@@ -341,19 +351,11 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
 
     @VisibleForTesting
     void onAppTargetEvent(AppTargetEvent event, int client) {
-        PredictorState state;
-        switch (client) {
-            case CONTAINER_ALL_APPS_PREDICTION:
-                state = mAllPredictionAppsState;
-                break;
-            case CONTAINER_WIDGETS_PREDICTION:
-                state = mWidgetsRecommendationState;
-                break;
-            case CONTAINER_HOTSEAT_PREDICTION:
-            default:
-                state = mHotseatPredictionState;
-                break;
-        }
+        PredictorState state = switch (client) {
+            case CONTAINER_ALL_APPS_PREDICTION -> mAllPredictionAppsState;
+            case CONTAINER_WIDGETS_PREDICTION -> mWidgetsRecommendationState;
+            default -> mHotseatPredictionState;
+        };
 
         state.notifyAppTargetEvent(event);
         Log.d(TAG, "notifyAppTargetEvent action=" + event.getAction()
