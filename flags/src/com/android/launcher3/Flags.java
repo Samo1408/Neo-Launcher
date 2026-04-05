@@ -264,6 +264,11 @@ public final class Flags {
         return true;
     }
 
+    public static boolean multilineSearchBar() {
+
+        return false;
+    }
+
     public static boolean showFilesOnHomeScreen() {
 
         return true;
