@@ -575,6 +575,7 @@ class StatsLogCompatManager private constructor(context: Context) : StatsLogMana
             if (Utilities.isRunningInTestHarness()) {
                 return
             }
+            /*
             if (Utilities.ATLEAST_U) {
                 SysUiStatsLog.write(
                     SysUiStatsLog.LAUNCHER_SNAPSHOT,
@@ -599,7 +600,8 @@ class StatsLogCompatManager private constructor(context: Context) : StatsLogMana
                     getFeatures(info),
                     getAttributes(info), /* attributes */
                 )
-            }
+            }*/
+
         }
 
         private fun getAttributes(itemInfo: LauncherAtom.ItemInfo): ByteArray =
