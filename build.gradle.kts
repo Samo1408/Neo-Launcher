@@ -145,8 +145,15 @@ android {
         }
 
         release {
-            isMinifyEnabled = false
-            setProguardFiles(listOf("proguard-android-optimize.txt", "proguard.flags"))
+            isMinifyEnabled = true
+            isShrinkResources = true
+        }
+        all {
+            isCrunchPngs = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard.flags"
+            )
         }
     }
 
