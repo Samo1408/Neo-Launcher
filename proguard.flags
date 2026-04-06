@@ -5,6 +5,7 @@
 -keep,allowshrinking,allowoptimization class com.android.systemui.shared.** {*;}
 -keepclasseswithmembernames class com.android.systemui.shared.** {*;}
 
+# reconsider
 -keep,allowshrinking,allowoptimization class com.android.quickstep.** {*;}
 -keepclasseswithmembernames class com.android.quickstep.** {*;}
 
@@ -58,4 +59,25 @@
 
 -keep class com.android.internal.protolog.** {
   *;
+}
+
+# CustomWidgetPlugin: as loaded via Class.forName in CustomWidgetManager
+-keep class * implements com.android.systemui.plugins.CustomWidgetPlugin {
+    public <init>(android.content.Context);
+}
+
+# Deps
+-keep class com.android.launcher3.dagger.Dagger** { *; }
+-keep class * extends dagger.internal.Factory { *; }
+-keepattributes *Annotation*
+-keepclassmembers class * implements android.os.Parcelable {
+    public static final ** CREATOR;
+}
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+-keep class * extends com.google.protobuf.GeneratedMessageLite { *; }
+-keep class com.android.launcher3.settings.** extends androidx.preference.Preference {
+    public <init>(...);
 }
