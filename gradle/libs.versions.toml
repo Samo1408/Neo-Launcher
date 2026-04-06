@@ -17,6 +17,7 @@ fuzzywuzzy = "1.4.0"
 error-prone-annotations = "2.48.0"
 graphics-shapes = "1.1.0"
 guava = "33.5.0-android"
+gradle-toolchains = "1.0.0"
 hoko-blur = "1.5.3"
 immutables = "0.4.0"
 inject = "1"
@@ -150,3 +151,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 google-ksp = "com.google.devtools.ksp:2.3.4"
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
+gradle-toolchains = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "gradle-toolchains" }

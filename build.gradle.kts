@@ -42,6 +42,7 @@ plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.dagger.hilt)
     alias(libs.plugins.google.ksp)
+    alias(libs.plugins.gradle.toolchains) apply false
 }
 allprojects {
     plugins.withType<AndroidBasePlugin>().configureEach {
