@@ -67,8 +67,8 @@ fun ProfilePrefsPage() {
     val profilePrefs = listOfNotNull(
         prefs.profileLanguage,
         /*prefs.profileTheme,
-        prefs.profileAccentColor,
-        prefs.profileIconPack,*/
+        prefs.profileAccentColor,*/
+        prefs.profileIconPack,
         prefs.profileIconShape,
         /*
                 if (customIconsCount > 0) {
