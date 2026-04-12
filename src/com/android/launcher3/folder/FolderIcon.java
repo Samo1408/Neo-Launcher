@@ -622,7 +622,18 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
         super.dispatchDraw(canvas);
 
         if (!mBackgroundIsVisible) return;
-        if (isCustomIcon) return;
+        if (isCustomIcon) {
+            if (mInfo.isCoverMode()) {
+                WorkspaceItemInfo coverInfo = mInfo.getCoverInfo();
+                if (coverInfo != null) {
+                    mFolderName.setTag(coverInfo);
+                    mFolderName.applyIcon(coverInfo);
+                    applyCoverDotState(coverInfo, false);
+                }
+            }
+            mBackground.setStartOpacity(0f);
+            return;
+        }
 
         mPreviewItemManager.recomputePreviewDrawingParams();
 
@@ -739,7 +750,7 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
         DeviceProfile grid = mActivity.getDeviceProfile();
         mFolderName.setTag(null);
 
-        if (mInfo.useIconMode(getContext())) {
+        if (mInfo.useIconMode()) {
             lp.topMargin = 0;
             mFolderName.setCompoundDrawablePadding(grid.getWorkspaceIconProfile().getIconDrawablePaddingPx());
             isCustomIcon = true;

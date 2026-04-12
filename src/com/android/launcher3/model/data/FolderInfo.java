@@ -23,20 +23,27 @@ import static androidx.core.util.Preconditions.checkNotNull;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
+import static com.android.launcher3.folder.FolderIcon.inflateIcon;
 import static com.android.launcher3.logger.LauncherAtom.Attribute.EMPTY_LABEL;
 import static com.android.launcher3.logger.LauncherAtom.Attribute.MANUAL_LABEL;
 import static com.android.launcher3.logger.LauncherAtom.Attribute.SUGGESTED_LABEL;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherSettings;
+import com.android.launcher3.R;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderNameInfos;
+import com.android.launcher3.icons.BitmapRenderer;
 import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logger.LauncherAtom.Attribute;
 import com.android.launcher3.logger.LauncherAtom.FolderIcon;
@@ -181,11 +188,26 @@ public class FolderInfo extends CollectionInfo {
     }
 
     public Drawable getIcon(Context context) {
+        Launcher launcher = Launcher.getLauncher(context);
         if (isCoverMode()) {
             WorkspaceItemInfo cover = getCoverInfo();
             return cover != null ? cover.newIcon(context) : null;
         }
-        return null;
+        return getFolderIcon(launcher);
+    }
+
+    public Drawable getFolderIcon(Launcher launcher) {
+        int iconSize = launcher.getDeviceProfile().folderIconSizePx;
+        LinearLayout dummy = new LinearLayout(launcher, null);
+        com.android.launcher3.folder.FolderIcon icon =  inflateIcon(R.layout.folder_icon, launcher, dummy, this);
+        icon.isCustomIcon = false;
+        icon.getFolderBackground().setStartOpacity(1f);
+        Bitmap b = BitmapRenderer.createHardwareBitmap(iconSize, iconSize, out -> {
+            out.translate(iconSize / 2f, 0);
+            icon.draw(out);
+        });
+        icon.unbind();
+        return new BitmapDrawable(launcher.getResources(), b);
     }
 
     public CharSequence getIconTitle(Folder folder) {
@@ -358,7 +380,7 @@ public class FolderInfo extends CollectionInfo {
         return LauncherAtom.ToState.TO_STATE_UNSPECIFIED;
     }
 
-    public boolean useIconMode(Context context) {
+    public boolean useIconMode() {
         return isCoverMode();
     }
 
