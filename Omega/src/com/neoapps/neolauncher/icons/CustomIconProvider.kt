@@ -159,7 +159,7 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
                     themedIcon = if (themeData != null) {
                         CustomAdaptiveIconDrawable(
                             themedColors[0].toDrawable(),
-                            themeData.loadPaddedDrawable().apply { setTint(themedColors[1]) },
+                            themeData.loadPaddedDrawable()?.apply { setTint(themedColors[1]) },
                         )
                     } else {
                         null

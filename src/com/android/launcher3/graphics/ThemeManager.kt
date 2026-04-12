@@ -152,6 +152,7 @@ constructor(
             }
 
         val folderRadius = shapeModel?.folderRadiusRatio ?: 1f
+        // TODO custom folder shape based on icon shape
         val folderShape =
             if (oldState != null && oldState.folderRadius == folderRadius) {
                 oldState.folderShape
