@@ -54,12 +54,14 @@ class IconPackProvider(private val context: Context) {
         val iconPacks = Config.ICON_INTENTS
             .flatMap { pm.queryIntentActivities(it, 0) }
             .associateBy { it.activityInfo.packageName }
-            .mapTo(mutableSetOf()) { (_, info) ->
-                IconPackInfo(
-                    info.loadLabel(pm).toString(),
-                    info.activityInfo.packageName,
-                    info.loadIcon(pm)
-                )
+            .mapNotNullTo(mutableSetOf()) { (_, info) ->
+                runCatching {
+                    IconPackInfo(
+                        info.loadLabel(pm).toString(),
+                        info.activityInfo.packageName,
+                        info.loadIcon(pm)
+                    )
+                }.getOrNull()
             }
         val defaultIconPack =
             IconPackInfo(context.getString(R.string.icon_pack_default), "", systemIcon)
@@ -118,26 +120,32 @@ class IconPackProvider(private val context: Context) {
         iconEntry: IconEntry,
         drawable: Drawable,
     ): Drawable {
+        if (iconEntry.packPackageName.isEmpty()) return drawable
         val themedColors: IntArray = ThemedIconDrawable.getColors(context)
-        val res = packageManager.getResourcesForApplication(iconEntry.packPackageName)
+        return try {
+            val res = packageManager.getResourcesForApplication(iconEntry.packPackageName)
 
-        val iconPrefs = IconPreferences(context)
+            val iconPrefs = IconPreferences(context)
 
-        @SuppressLint("DiscouragedApi")
-        val resId = res.getIdentifier(iconEntry.name, "drawable", iconEntry.packPackageName)
-        val bg: Drawable = ColorDrawable(themedColors[0])
-        val td = IconProvider.ThemeData(res, resId)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            drawable is AdaptiveIconDrawable &&
-            drawable.monochrome == null
-        ) {
-            return AdaptiveIconDrawable(
-                bg,
-                drawable.foreground,
-                td.loadPaddedDrawable(),
-            )
+            @SuppressLint("DiscouragedApi")
+            val resId = res.getIdentifier(iconEntry.name, "drawable", iconEntry.packPackageName)
+            val bg: Drawable = ColorDrawable(themedColors[0])
+            val td = IconProvider.ThemeData(res, resId)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                drawable is AdaptiveIconDrawable &&
+                drawable.monochrome == null
+            ) {
+                AdaptiveIconDrawable(
+                    bg,
+                    drawable.foreground,
+                    td.loadPaddedDrawable(),
+                )
+            } else {
+                drawable
+            }
+        } catch (_: PackageManager.NameNotFoundException) {
+            drawable
         }
-        return drawable
     }
 
     companion object {
