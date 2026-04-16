@@ -265,7 +265,12 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
             android.content.pm.LauncherApps launcherApps = mContext.getSystemService(android.content.pm.LauncherApps.class);
 
             for (AppTracker app : recentApps) {
-                android.os.UserHandle user = mUserCache.getUserForSerialNumber(app.getUserSerialNumber());
+                long userSerialNumber = 0L;
+                if (app.getUserSerialNumber() != null) {
+                    userSerialNumber = app.getUserSerialNumber();
+                }
+
+                android.os.UserHandle user = mUserCache.getUserForSerialNumber(userSerialNumber);
                 if (user != null) {
                     List<android.content.pm.LauncherActivityInfo> activities = launcherApps.getActivityList(app.getPackageName(), user);
                     if (!activities.isEmpty()) {
