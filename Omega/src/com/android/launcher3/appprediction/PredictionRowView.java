@@ -17,6 +17,8 @@
 package com.android.launcher3.appprediction;
 
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
+import static com.android.launcher3.Utilities.dpToPx;
+import static com.neoapps.neolauncher.preferences.ConstantsKt.LAYOUT_CATEGORIES;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -75,6 +77,7 @@ public class PredictionRowView<T extends Context & ActivityContext>
     private boolean mPredictionsEnabled = true;
 
     private boolean mPredictionUiUpdatePaused = false;
+    private final NeoPrefs prefs = NeoPrefs.getInstance();
 
     public PredictionRowView(@NonNull Context context) {
         this(context, null);
@@ -106,6 +109,7 @@ public class PredictionRowView<T extends Context & ActivityContext>
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mActivityContext.addOnDeviceProfileChangeListener(this);
+        post(this::updateCategoryInset);
     }
 
     @Override
@@ -120,7 +124,7 @@ public class PredictionRowView<T extends Context & ActivityContext>
 
     private void updateVisibility() {
         boolean enabled = mPredictionsEnabled
-                && NeoPrefs.getInstance().getDrawerAppSuggestions().getValue();
+                && prefs.getDrawerAppSuggestions().getValue();
         setVisibility(enabled ? VISIBLE : GONE);
         if (mActivityContext.getAppsView() != null) {
             if (enabled) {
@@ -135,6 +139,25 @@ public class PredictionRowView<T extends Context & ActivityContext>
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(getExpectedHeight(),
                 MeasureSpec.EXACTLY));
+    }
+
+    private void updateCategoryInset() {
+        int leftInset = 0;
+        if (prefs.getDrawerLayout().getValue() == LAYOUT_CATEGORIES) {
+            leftInset = dpToPx(48);
+            if (mActivityContext.getAppsView() != null) {
+                View categoriesBar = mActivityContext.getAppsView().findViewById(R.id.categories_bar);
+                if (categoriesBar != null) {
+                    leftInset = Math.max(leftInset,
+                            Math.max(categoriesBar.getWidth(), categoriesBar.getMeasuredWidth()));
+                }
+            }
+        }
+
+        if (getPaddingLeft() != leftInset || getPaddingTop() != 0
+                || getPaddingRight() != 0 || getPaddingBottom() != 0) {
+            setPadding(leftInset, 0, 0, 0);
+        }
     }
 
     @Override

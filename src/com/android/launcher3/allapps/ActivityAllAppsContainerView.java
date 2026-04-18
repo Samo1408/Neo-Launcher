@@ -765,6 +765,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
 
         final View rvContainer = getLayoutInflater().inflate(layout, this, false);
         addView(rvContainer, index);
+        updateHeaderElevation();
         if (showTabs) {
             mViewPager = (AllAppsPagedView) rvContainer;
             mViewPager.addTabs(tabController.getTabsCount());
@@ -814,10 +815,23 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         updateSearchResultsVisibility();
     }
 
+    private void updateHeaderElevation() {
+        if (mHeader == null) {
+            return;
+        }
+
+        float headerElevation = prefs.getDrawerLayout().getValue() == LAYOUT_CATEGORIES
+                ? Utilities.dpToPx(24)
+                : 0;
+        mHeader.setTranslationZ(headerElevation);
+        mHeader.setElevation(headerElevation);
+    }
+
     void setupHeader() {
         mAdditionalHeaderRows.forEach(row -> mHeader.onPluginDisconnected(row));
 
         mHeader.setVisibility(View.VISIBLE);
+        updateHeaderElevation();
         boolean tabsHidden = !mUsingTabs;
 
         mHeader.setup(mAH,
