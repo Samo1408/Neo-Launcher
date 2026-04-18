@@ -468,7 +468,7 @@
     <string name="title__dock_icon_size_enforce">Simge boyutunu özel olarak ayarla</string>
     <string name="title_drawer_all_apps">Hepsi</string>
     <string name="title_drawer_horizontal">Yatay</string>
-    <string name="title_drawer_categorized">Kategorize edilmiş</string>
+    <string name="title_drawer_categorized">Dikey Kategoriler</string>
     <string name="color_wallpaper_tertiary">Üçüncül Duvar Kağıdı</string>
     <string name="weather_city">Şehir</string>
     <string name="accessibility_next_alarm">Sonraki alarm: %s</string>
@@ -487,7 +487,7 @@
     <string name="title_smartspace_background">Temalı Arkaplanı Göster</string>
     <string name="title_all_apps_hide_scrollbar">Kaydırma Çubuğunu Gizle</string>
     <string name="web_search_provider">Web Arama Sağlayıcısı</string>
-    <string name="title_drawer_layout_categories">Düzen Kategorileri</string>
+    <string name="title_drawer_layout_categories">Kategorileri Yönet</string>
     <string name="title_themed_background">Şeffaf simge arkaplanı</string>
     <string name="smartspace_flight_qr_code">QR kodu</string>
     <string name="gesture_press_recents">Son kullanılanlar düğmesi</string>
@@ -521,4 +521,28 @@
     <string name="web_search_neeva">Neeva(Web)</string>
     <string name="web_search_wolfram_alpha">Wolfram Alpha(Web)</string>
     <string name="web_search_phind">Phind(Web)</string>
+    <string name="hotseat_prediction_content_description">Tahmin edilen uygulama: <xliff:g id="title" example="Chrome">%1$s</xliff:g></string>
+    <string name="hotseat_tip_gaps_filled">Boş alana uygulama önerileri eklendi</string>
+    <string name="title_app_suggestions">Uygulama önerileri</string>
+    <string name="title_desktop_cycle_scrolling">Döngüsel Kaydırma</string>
+    <string name="title_manage_tabs">Sekmeleri Yönet</string>
+    <string name="summary_manage_tabs">Sekmeler oluş veya düzenle</string>
+    <string name="title_drawer_tabs">Yatay Sekmeler</string>
+    <string name="category_art_and_design">Tasarım</string>
+    <string name="category_business_and_productivity">Verimlilik</string>
+    <string name="category_communication">İletişim</string>
+    <string name="category_entertainment">Eğlence</string>
+    <string name="category_game">Oyun</string>
+    <string name="category_health_and_fitness">Fitness</string>
+    <string name="category_lifestyle">Yaşam Tarzı</string>
+    <string name="category_knowledge_and_reference">Bilgi</string>
+    <string name="category_music">Müzik</string>
+    <string name="category_news">Haber</string>
+    <string name="category_personalization">Kişiselleştirme</string>
+    <string name="category_tools">Araçlar</string>
+    <string name="category_travel_and_navigation">Navigasyon</string>
+    <string name="trust_apps_unlock">Kilidi kaldır</string>
+    <string name="trust_apps_message">Korumalı uygulamalara erişim için kimlik doğrulama gereklidir</string>
+    <string name="title_enable_feed">Beslemeyi Etkinleştir</string>
+    <string name="title__about_acknowledgement">Teşekkürler</string>
 </resources>
