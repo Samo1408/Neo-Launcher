@@ -1,9 +1,9 @@
 name: Neo Launcher CI
 on:
   push:
-    branches: [ A16 ]
+    branches: [ main ]
   pull_request:
-    branches: [ A16 ]
+    branches: [ main ]
 
 jobs:
   build:
