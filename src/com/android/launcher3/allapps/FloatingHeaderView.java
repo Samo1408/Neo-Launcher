@@ -88,6 +88,7 @@ public class FloatingHeaderView extends LinearLayout implements
     private final int mTabsAdditionalPaddingBottom;
 
     protected PersonalWorkSlidingTabStrip mTabLayout;
+    protected View mTabsScroller;
     private SearchRecyclerView mSearchRV;
     private AllAppsRecyclerView mCurrentRV;
     protected int mSnappedScrolledY;
@@ -132,6 +133,10 @@ public class FloatingHeaderView extends LinearLayout implements
     protected void onFinishInflate() {
         super.onFinishInflate();
         mTabLayout = findViewById(R.id.tabs);
+        mTabsScroller = findViewById(R.id.tabs_scroller);
+        if (mTabsScroller == null) {
+            mTabsScroller = mTabLayout;
+        }
 
         // Find all floating header rows.
         ArrayList<FloatingHeaderRow> rows = new ArrayList<>();
@@ -144,7 +149,7 @@ public class FloatingHeaderView extends LinearLayout implements
         }
         mFixedRows = rows.toArray(new FloatingHeaderRow[rows.size()]);
         mAllRows = mFixedRows;
-        updateFloatingRowsHeight();
+        updateExpectedHeight();
     }
 
     @Override
@@ -185,8 +190,14 @@ public class FloatingHeaderView extends LinearLayout implements
             // Plugin has already been connected
             return;
         }
+        for (FloatingHeaderRow row : mFixedRows) {
+            if (row == allAppsRowPlugin) {
+                onHeightUpdated();
+                return;
+            }
+        }
         PluginHeaderRow headerRow = new PluginHeaderRow(allAppsRowPlugin, this);
-        addView(headerRow.mView, indexOfChild(mTabLayout));
+        addView(headerRow.mView, indexOfChild(mTabsScroller));
         mPluginRows.put(allAppsRowPlugin, headerRow);
         recreateAllRowsArray();
         allAppsRowPlugin.setOnHeightUpdatedListener(this);
@@ -244,6 +255,10 @@ public class FloatingHeaderView extends LinearLayout implements
         mTabsHidden = tabsHidden;
         mTabLayout.setVisibility(tabsHidden ? View.GONE : View.VISIBLE);
         updateExpectedHeight();
+        for (AllAppsRecyclerView rv : mRVs) {
+            rv.removeOnScrollListener(mOnScrollListener);
+        }
+        mRVs.clear();
         for (ActivityAllAppsContainerView<?>.AdapterHolder holder : mAH) {
             if (holder.mRecyclerView != null) {
                 AllAppsRecyclerView newHolder = holder.mRecyclerView;
@@ -355,7 +370,7 @@ public class FloatingHeaderView extends LinearLayout implements
             }
         }
 
-        mTabLayout.setTranslationY(mTranslationY);
+        mTabsScroller.setTranslationY(Math.max(uncappedTranslationY, -(mFloatingRowsHeight + mSearchBarOffset)));
 
         int clipTop = getPaddingTop() - mTabsAdditionalPaddingTop;
         if (mTabsHidden) {
