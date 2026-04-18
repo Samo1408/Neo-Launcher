@@ -87,12 +87,13 @@ fun DrawerPrefsPage() {
                     prefs.drawerTabManager
                 } else {
                     null
-                }
+                },
                 /*
                 prefs.drawerAppGroups,
-                prefs.drawerCellHeightMultiplier,
+                prefs.drawerCellHeightMultiplier,*/
                 prefs.drawerSaveScrollPosition,
-                prefs.drawerHideScrollbar*/
+                /*
+                                prefs.drawerHideScrollbar*/
             ).toTypedArray()
         )
     }

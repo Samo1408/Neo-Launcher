@@ -484,6 +484,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
      * @param clearScrim Whether to clear the all apps scrim.
      */
     public void reset(boolean animate, boolean exitSearch, boolean clearScrim) {
+        if (!prefs.getDrawerSaveScrollPosition().getValue()) {
         // Scroll Main and Work RV to top. Search RV is done in `resetSearch`.
         for (int i = 0; i < mAH.size(); i++) {
             if (mAH.get(i).mRecyclerView != null) {
@@ -504,6 +505,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         if (exitSearch) {
             // Reset the search bar and search RV after transitioning home.
             MAIN_EXECUTOR.getHandler().post(mSearchUiManager::resetSearch);
+        }
         }
         if (isSearching()) {
             mWorkManager.reset();
