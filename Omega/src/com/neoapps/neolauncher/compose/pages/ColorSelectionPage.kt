@@ -21,7 +21,6 @@ package com.neoapps.neolauncher.compose.pages
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,12 +55,12 @@ import androidx.datastore.preferences.core.Preferences
 import com.android.launcher3.R
 import com.neoapps.neolauncher.compose.components.ColorItem
 import com.neoapps.neolauncher.compose.components.DialogNegativeButton
-import com.neoapps.neolauncher.compose.components.HorizontalPagerNavBar
 import com.neoapps.neolauncher.compose.components.HorizontalPagerPage
 import com.neoapps.neolauncher.compose.components.SingleSelectionListItem
 import com.neoapps.neolauncher.compose.components.TabItem
 import com.neoapps.neolauncher.compose.components.ViewWithActionBar
 import com.neoapps.neolauncher.compose.navigation.LocalPaneNavigator
+import com.neoapps.neolauncher.compose.navigation.NeoNavigationSuiteScaffold
 import com.neoapps.neolauncher.preferences.PrefKey
 import com.neoapps.neolauncher.theme.AccentColorOption
 import com.neoapps.neolauncher.util.blockBorder
@@ -70,11 +69,13 @@ import com.neoapps.neolauncher.util.prefs
 import com.neoapps.neolauncher.util.staticColors
 import com.raedapps.alwan.rememberAlwanState
 import com.raedapps.alwan.ui.Alwan
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun ColorSelectionPage(prefKey: Preferences.Key<String>) {
+    val scope = rememberCoroutineScope()
     val prefs = LocalContext.current.prefs
     val pref = when (prefKey) {
         PrefKey.DESKTOP_FOLDER_BG_COLOR     -> prefs.desktopFolderBackgroundColor
@@ -90,7 +91,7 @@ fun ColorSelectionPage(prefKey: Preferences.Key<String>) {
     val presetColors = staticColors
     val coroutineScope = rememberCoroutineScope()
 
-    val tabs = listOf(
+    val tabs = persistentListOf(
         TabItem(title = R.string.color_presets, icon = R.drawable.ic_setting) {
             PresetsPage(
                 presetColors = presetColors,
@@ -124,51 +125,59 @@ fun ColorSelectionPage(prefKey: Preferences.Key<String>) {
     ViewWithActionBar(
         title = stringResource(pref.titleId),
         bottomBar = {
-            Column {
-                HorizontalPagerNavBar(tabs = tabs, pagerState = pagerState)
-                BottomAppBar(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    containerColor = MaterialTheme.colorScheme.background
-                ) {
-                    DialogNegativeButton(
-                        onClick = {
-                            coroutineScope.launch {
-                                paneNavigator.navigateBack(BackNavigationBehavior.PopLatest)
+            BottomAppBar(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                containerColor = MaterialTheme.colorScheme.background
+            ) {
+                DialogNegativeButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            paneNavigator.navigateBack(BackNavigationBehavior.PopLatest)
 
-                            }
                         }
-                    )
-                    Button(
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .height(48.dp)
-                            .fillMaxWidth(),
-                        onClick = {
-                            pref.setValue(currentAccentColor.value)
-                            coroutineScope.launch {
-                                paneNavigator.navigateBack(BackNavigationBehavior.PopLatest)
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.button_apply),
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
                     }
+                )
+                Button(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .height(48.dp)
+                        .fillMaxWidth(),
+                    onClick = {
+                        pref.setValue(currentAccentColor.value)
+                        coroutineScope.launch {
+                            paneNavigator.navigateBack(BackNavigationBehavior.PopLatest)
+                        }
+                    }
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.button_apply),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         }
     ) { paddingValues ->
-        HorizontalPagerPage(
-            pagerState = pagerState,
-            tabs = tabs,
-            modifier = Modifier
-                .padding(paddingValues)
-                .blockBorder()
-                .fillMaxSize(),
-        )
+        NeoNavigationSuiteScaffold(
+            pages = tabs,
+            selectedPage = pagerState.currentPage,
+            onItemClick = { index ->
+                scope.launch {
+                    pagerState.animateScrollToPage(index)
+                }
+            },
+            modifier = Modifier.padding(paddingValues),
+        ) {
+            HorizontalPagerPage(
+                pagerState = pagerState,
+                tabs = tabs,
+                modifier = Modifier
+                    .blockBorder()
+                    .fillMaxSize(),
+                enableScroll = false,
+            )
+        }
     }
 }
 

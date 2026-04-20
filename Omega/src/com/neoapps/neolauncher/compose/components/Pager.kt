@@ -31,10 +31,12 @@ fun HorizontalPagerPage(
     pagerState: PagerState,
     tabs: List<TabItem>,
     modifier: Modifier = Modifier,
+    enableScroll: Boolean = true,
 ) {
     HorizontalPager(
         modifier = modifier,
         state = pagerState,
+        userScrollEnabled = enableScroll,
     ) { page ->
         tabs[page].screen()
     }
