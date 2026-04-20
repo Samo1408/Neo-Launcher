@@ -64,15 +64,17 @@ material3 = "1.4.0"
 
 [libraries]
 gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
-accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "compose-accompanist" }
 alwan = { module = "com.raedapps:alwan", version.ref = "alwan" }
 annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "immutables" }
+
+accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "compose-accompanist" }
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 compose-adaptive = { module = "androidx.compose.material3.adaptive:adaptive" }
 compose-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout" }
 compose-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation" }
+compose-material3-navigationsuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
@@ -85,6 +87,7 @@ compose-runtime = { module = "androidx.compose.runtime:runtime" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+
 constraint-layout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraint-layout" }
 coordinator-layout = { group = "androidx.coordinatorlayout", name = "coordinatorlayout", version.ref = "coordinator-layout" }
 core-animation = {group = "androidx.core", name="core-animation", version.ref="core-animation"}
