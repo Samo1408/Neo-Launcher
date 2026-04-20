@@ -20,12 +20,13 @@ package com.neoapps.neolauncher.compose.pages.preferences
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,7 +35,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,7 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -139,13 +138,17 @@ fun SearchProvidersPage() {
                     text = stringResource(id = R.string.enabled_events),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
             itemsIndexed(enabledItems, key = { _, it -> it.id }) { subIndex, item ->
                 ReorderableItem(
                     reorderableListState,
                     key = item.id,
+                    modifier = Modifier.animateItem(),
                 ) { isDragging ->
                     val elevation by animateDpAsState(
                         if (isDragging) 16.dp else 0.dp,
@@ -153,7 +156,7 @@ fun SearchProvidersPage() {
                     )
                     val bgColor by animateColorAsState(
                         if (isDragging) MaterialTheme.colorScheme.primaryContainer
-                        else MaterialTheme.colorScheme.surfaceContainer,
+                        else MaterialTheme.colorScheme.surfaceContainerHighest,
                         label = "bgColor",
                     )
 
@@ -188,17 +191,20 @@ fun SearchProvidersPage() {
             }
 
             stickyHeader {
-                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = stringResource(id = R.string.tap_to_enable),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
             itemsIndexed(disabledItems, key = { _, it -> it.id }) { subIndex, item ->
                 ListItemWithIcon(
                     modifier = Modifier
+                        .animateItem()
                         .clip(GroupItemShape(subIndex, disabledItems.size - 1))
                         .combinedClickable(
                             onClick = {
@@ -209,7 +215,6 @@ fun SearchProvidersPage() {
                                 openDialog.value = true
                             }
                         ),
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     title = item.name,
                     startIcon = {
                         AsyncImage(
