@@ -27,11 +27,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -49,7 +46,7 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.R
-import com.neoapps.neolauncher.compose.components.ListItemWithIcon
+import com.neoapps.neolauncher.compose.components.ListItemWithCheckbox
 import com.neoapps.neolauncher.compose.components.OverflowMenu
 import com.neoapps.neolauncher.compose.components.ViewWithActionBar
 import com.neoapps.neolauncher.compose.components.preferences.PreferenceGroup
@@ -119,7 +116,7 @@ fun AppSelectionPage(
                         val isSelected = rememberSaveable(selected) {
                             mutableStateOf(selected.contains(app.key.toString()))
                         }
-                        ListItemWithIcon(
+                        ListItemWithCheckbox(
                             modifier = Modifier
                                 .clip(GroupItemShape(index, appsSize - 1))
                                 .clickable {
@@ -135,21 +132,11 @@ fun AppSelectionPage(
                                     modifier = Modifier.size(40.dp)
                                 )
                             },
-                            endCheckbox = {
-                                Checkbox(
-                                    checked = isSelected.value,
-                                    onCheckedChange = {
-                                        selected = if (it) selected.plus(app.key.toString())
-                                        else selected.minus(app.key.toString())
-                                    },
-
-                                    colors = CheckboxDefaults.colors(
-                                        checkedColor = MaterialTheme.colorScheme.primary,
-                                        uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        checkmarkColor = MaterialTheme.colorScheme.onPrimary
-                                    ),
-                                    modifier = Modifier.size(24.dp)
-                                )
+                            checkBox = true,
+                            checked = isSelected.value,
+                            onCheck = {
+                                selected = if (it) selected.plus(app.key.toString())
+                                else selected.minus(app.key.toString())
                             },
                             index = index,
                             groupSize = appsSize

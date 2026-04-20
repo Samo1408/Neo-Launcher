@@ -26,15 +26,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neoapps.neolauncher.compose.icons.Phosphor
@@ -46,11 +52,12 @@ fun ListItemWithIcon(
     modifier: Modifier = Modifier,
     title: String,
     summary: String = "",
-    containerColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.12f),
     index: Int = 0,
     groupSize: Int = 1,
+    icon: ImageVector? = null,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    contentColor: Color = MaterialTheme.colorScheme.contentColorFor(containerColor),
     startIcon: (@Composable () -> Unit)? = null,
-    endCheckbox: (@Composable () -> Unit)? = null,
 ) {
     ListItem(
         modifier = modifier
@@ -70,9 +77,133 @@ fun ListItemWithIcon(
                 )
             }
         },
-        trailingContent = endCheckbox?.apply {} ?: {},
+        trailingContent = icon?.let {
+            @Composable {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = contentColor,
+                )
+            }
+        },
         colors = ListItemDefaults.colors(
-            containerColor = containerColor
+            containerColor = containerColor,
+            headlineColor = contentColor,
+            leadingIconColor = contentColor,
+            supportingColor = contentColor,
+            trailingIconColor = contentColor,
+        )
+    )
+}
+
+@Composable
+fun ListItemWithRadioButton(
+    modifier: Modifier = Modifier,
+    title: String,
+    summary: String = "",
+    index: Int = 0,
+    groupSize: Int = 1,
+    radioButton: Boolean = false,
+    selected: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    contentColor: Color = MaterialTheme.colorScheme.contentColorFor(containerColor),
+    startIcon: (@Composable () -> Unit)? = null,
+) {
+    ListItem(
+        modifier = modifier
+            .clip(GroupItemShape(index, groupSize - 1)),
+        leadingContent = startIcon?.apply {} ?: {},
+        headlineContent = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium
+            )
+        },
+        supportingContent = {
+            if (summary.isNotEmpty()) {
+                Text(
+                    text = summary,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        },
+        trailingContent = radioButton.takeIf { it }?.run {
+            @Composable {
+                RadioButton(
+                    selected = selected,
+                    onClick = onClick,
+                    modifier = Modifier.size(24.dp),
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = contentColor,
+                        unselectedColor = contentColor,
+                    ),
+                )
+            }
+        } ?: {},
+        colors = ListItemDefaults.colors(
+            containerColor = containerColor,
+            headlineColor = contentColor,
+            leadingIconColor = contentColor,
+            supportingColor = contentColor,
+            trailingIconColor = contentColor,
+        )
+    )
+}
+
+@Composable
+fun ListItemWithCheckbox(
+    modifier: Modifier = Modifier,
+    title: String,
+    summary: String = "",
+    index: Int = 0,
+    groupSize: Int = 1,
+    checkBox: Boolean = false,
+    checked: Boolean = false,
+    onCheck: ((Boolean) -> Unit)? = null,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    contentColor: Color = MaterialTheme.colorScheme.contentColorFor(containerColor),
+    startIcon: (@Composable () -> Unit)? = null,
+) {
+    ListItem(
+        modifier = modifier
+            .clip(GroupItemShape(index, groupSize - 1)),
+        leadingContent = startIcon?.apply {} ?: {},
+        headlineContent = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium
+            )
+        },
+        supportingContent = {
+            if (summary.isNotEmpty()) {
+                Text(
+                    text = summary,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        },
+        trailingContent = checkBox.takeIf { it }?.run {
+            @Composable {
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = onCheck,
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = contentColor,
+                        checkmarkColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        } ?: {},
+        colors = ListItemDefaults.colors(
+            containerColor = containerColor,
+            headlineColor = contentColor,
+            leadingIconColor = contentColor,
+            supportingColor = contentColor,
+            trailingIconColor = contentColor,
         )
     )
 }
@@ -81,7 +212,7 @@ fun ListItemWithIcon(
 @Composable
 fun PreviewListItemWithIcon() {
     Column {
-        ListItemWithIcon(
+        ListItemWithRadioButton(
             title = "System Iconpack",
             modifier = Modifier.clickable { },
             summary = "com.neoapps.neolauncher",
@@ -98,17 +229,13 @@ fun PreviewListItemWithIcon() {
                 )
 
             },
-            endCheckbox = {
-                RadioButton(
-                    selected = false,
-                    onClick = null
-                )
-            },
+            radioButton = true,
+            selected = false,
             index = 0,
             groupSize = 2
         )
         Spacer(modifier = Modifier.height(2.dp))
-        ListItemWithIcon(
+        ListItemWithRadioButton(
             title = "System Iconpack",
             modifier = Modifier.clickable { },
             summary = "com.neoapps.neolauncher",
@@ -125,12 +252,8 @@ fun PreviewListItemWithIcon() {
                 )
 
             },
-            endCheckbox = {
-                RadioButton(
-                    selected = false,
-                    onClick = null
-                )
-            },
+            radioButton = true,
+            selected = false,
             index = 1,
             groupSize = 2
         )

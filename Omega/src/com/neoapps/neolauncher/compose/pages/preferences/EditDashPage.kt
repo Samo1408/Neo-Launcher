@@ -33,7 +33,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,6 +51,9 @@ import com.android.launcher3.R
 import com.neoapps.neolauncher.compose.components.ListItemWithIcon
 import com.neoapps.neolauncher.compose.components.ViewWithActionBar
 import com.neoapps.neolauncher.compose.components.move
+import com.neoapps.neolauncher.compose.icons.Phosphor
+import com.neoapps.neolauncher.compose.icons.phosphor.ArrowsDownUp
+import com.neoapps.neolauncher.compose.icons.phosphor.Plus
 import com.neoapps.neolauncher.dash.dashProviderOptions
 import com.neoapps.neolauncher.preferences.NeoPrefs
 import com.neoapps.neolauncher.preferences.iconIds
@@ -146,21 +148,7 @@ fun EditDashPage() {
                                 modifier = Modifier.size(30.dp)
                             )
                         },
-                        endCheckbox = {
-                            IconButton(
-                                modifier = Modifier.size(36.dp),
-                                onClick = {
-                                    enabledItems.remove(item)
-                                    disabledItems.add(0, item)
-                                }
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.ic_plus),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        },
+                        icon = Phosphor.ArrowsDownUp,
                     )
                 }
             }
@@ -193,9 +181,7 @@ fun EditDashPage() {
                             modifier = Modifier.size(30.dp)
                         )
                     },
-                    endCheckbox = {
-                        Spacer(modifier = Modifier.height(32.dp))
-                    },
+                    icon = Phosphor.Plus,
                 )
             }
 

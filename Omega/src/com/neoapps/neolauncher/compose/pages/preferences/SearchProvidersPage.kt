@@ -60,6 +60,7 @@ import com.neoapps.neolauncher.compose.components.ListItemWithIcon
 import com.neoapps.neolauncher.compose.components.ViewWithActionBar
 import com.neoapps.neolauncher.compose.components.move
 import com.neoapps.neolauncher.compose.icons.Phosphor
+import com.neoapps.neolauncher.compose.icons.phosphor.ArrowsDownUp
 import com.neoapps.neolauncher.compose.icons.phosphor.Plus
 import com.neoapps.neolauncher.data.SearchProviderRepository
 import com.neoapps.neolauncher.preferences.NeoPrefs
@@ -179,20 +180,7 @@ fun SearchProvidersPage() {
                                 modifier = Modifier.size(30.dp)
                             )
                         },
-                        endCheckbox = {
-                            IconButton(
-                                modifier = Modifier.size(36.dp),
-                                onClick = {
-                                    searchProviderRepository.disableProvider(item)
-                                }
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.ic_rows),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        },
+                        icon = Phosphor.ArrowsDownUp,
                         index = subIndex,
                         groupSize = enabledItems.size
                     )
@@ -230,9 +218,7 @@ fun SearchProvidersPage() {
                             modifier = Modifier.size(30.dp)
                         )
                     },
-                    endCheckbox = {
-                        Spacer(modifier = Modifier.height(32.dp))
-                    },
+                    icon = Phosphor.Plus,
                     index = subIndex,
                     groupSize = disabledItems.size
                 )

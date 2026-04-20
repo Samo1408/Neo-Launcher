@@ -24,7 +24,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.android.launcher3.R
@@ -79,19 +77,23 @@ fun ExpandableListItem(
             },
         verticalArrangement = Arrangement.Center
     ) {
-        ListItemWithIcon(
+        ListItem(
             modifier = Modifier
                 .clip(GroupItemShape(index, if (isContentVisible) groupSize else groupSize - 1)),
-            title = title,
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            startIcon = {
+            leadingContent = {
                 Image(
                     bitmap = icon.asImageBitmap(),
                     contentDescription = title,
                     modifier = Modifier.size(40.dp),
                 )
             },
-            endCheckbox = {
+            headlineContent = {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            },
+            trailingContent = {
                 val arrow = if (isContentVisible) R.drawable.ic_expand_less
                 else R.drawable.ic_expand_more
                 Image(
@@ -100,8 +102,13 @@ fun ExpandableListItem(
                     modifier = Modifier.size(32.dp)
                 )
             },
-            index = index,
-            groupSize = groupSize
+            colors = ListItemDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                headlineColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                supportingColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                trailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         )
         AnimatedVisibility(visible = isContentVisible) {
             Column(

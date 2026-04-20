@@ -33,14 +33,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -69,7 +63,7 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.neoapps.neolauncher.compose.components.ExpandableListItem
 import com.neoapps.neolauncher.compose.components.HorizontalPagerNavBar
 import com.neoapps.neolauncher.compose.components.HorizontalPagerPage
-import com.neoapps.neolauncher.compose.components.ListItemWithIcon
+import com.neoapps.neolauncher.compose.components.ListItemWithRadioButton
 import com.neoapps.neolauncher.compose.components.TabItem
 import com.neoapps.neolauncher.compose.components.ViewWithActionBar
 import com.neoapps.neolauncher.compose.components.preferences.PreferenceGroup
@@ -173,7 +167,7 @@ fun LauncherScreen(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 itemsIndexed(launcherItems) { index, item ->
-                    ListItemWithIcon(
+                    ListItemWithRadioButton(
                         modifier = Modifier
                             .clip(
                                 GroupItemShape(index, groupSize - 1)
@@ -189,18 +183,12 @@ fun LauncherScreen(
                                 ),
                                 contentDescription = item.displayName,
                                 modifier = Modifier.size(24.dp),
-                                tint = Color.Black
                             )
                         },
-                        endCheckbox = {
-                            RadioButton(
-                                selected = (item.toString() == selectedOption.value),
-                                onClick = {
-                                    onSelect(item.toString())
-                                },
-                                colors = colors,
-                                modifier = Modifier.size(24.dp)
-                            )
+                        radioButton = true,
+                        selected = item.toString() == selectedOption.value,
+                        onClick = {
+                            onSelect(item.toString())
                         },
                         index = index,
                         groupSize = groupSize
@@ -258,7 +246,7 @@ fun AppsScreen(
                         appName = item.label
                     }
 
-                    ListItemWithIcon(
+                    ListItemWithRadioButton(
                         modifier = Modifier
                             .clip(GroupItemShape(index, appsSize - 1))
                             .clickable {
@@ -272,15 +260,10 @@ fun AppsScreen(
                                 modifier = Modifier.size(40.dp)
                             )
                         },
-                        endCheckbox = {
-                            RadioButton(
-                                selected = (appGestureHandler.toString() == selectedOption.value),
-                                onClick = {
-                                    onSelect(appGestureHandler.toString())
-                                },
-                                colors = colors,
-                                modifier = Modifier.size(24.dp)
-                            )
+                        radioButton = true,
+                        selected = appGestureHandler.toString() == selectedOption.value,
+                        onClick = {
+                            onSelect(appGestureHandler.toString())
                         },
                         index = index,
                         groupSize = appsSize
@@ -363,7 +346,7 @@ fun ShortcutsScreen(
                             appGestureHandler.apply {
                                 appName = it.label.toString()
                             }
-                            ListItemWithIcon(
+                            ListItemWithRadioButton(
                                 modifier = Modifier
                                     .clip(
                                         GroupItemShape(index, groupSize - 1)
@@ -383,16 +366,10 @@ fun ShortcutsScreen(
                                         modifier = Modifier.size(40.dp),
                                     )
                                 },
-
-                                endCheckbox = {
-                                    RadioButton(
-                                        selected = (appGestureHandler.toString() == selectedOption.value),
-                                        onClick = {
-                                            onSelect(appGestureHandler.toString())
-                                        },
-                                        colors = colors,
-                                        modifier = Modifier.size(24.dp)
-                                    )
+                                radioButton = true,
+                                selected = appGestureHandler.toString() == selectedOption.value,
+                                onClick = {
+                                    onSelect(appGestureHandler.toString())
                                 },
                                 index = index,
                                 groupSize = appsSize
