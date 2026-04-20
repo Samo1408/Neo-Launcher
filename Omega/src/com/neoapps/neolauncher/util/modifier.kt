@@ -2,6 +2,7 @@ package com.neoapps.neolauncher.util
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -24,11 +25,12 @@ inline fun <T> Modifier.addIfNotNull(
 
 fun Modifier.blockBorder() = composed {
     this
+        .padding(2.dp)
         .clip(MaterialTheme.shapes.extraLarge)
         .border(
-            1.dp,
-            MaterialTheme.colorScheme.outline,
-            MaterialTheme.shapes.extraLarge,
+            width = 0.5.dp,
+            color = MaterialTheme.colorScheme.outlineVariant,
+            shape = MaterialTheme.shapes.extraLarge,
         )
 }
 
