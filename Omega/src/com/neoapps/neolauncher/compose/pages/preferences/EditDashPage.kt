@@ -21,11 +21,13 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -110,13 +112,17 @@ fun EditDashPage() {
                     text = stringResource(id = R.string.enabled_events),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
             itemsIndexed(enabledItems, key = { _, it -> it.key }) { subIndex, item ->
                 ReorderableItem(
                     reorderableListState,
                     key = item.key,
+                    modifier = Modifier.animateItem(),
                 ) { isDragging ->
                     val elevation by animateDpAsState(
                         if (isDragging) 16.dp else 0.dp,
@@ -124,7 +130,7 @@ fun EditDashPage() {
                     )
                     val bgColor by animateColorAsState(
                         if (isDragging) MaterialTheme.colorScheme.primaryContainer
-                        else MaterialTheme.colorScheme.surfaceContainer,
+                        else MaterialTheme.colorScheme.surfaceContainerHighest,
                         label = "bgColor",
                     )
 
@@ -154,23 +160,25 @@ fun EditDashPage() {
             }
 
             stickyHeader {
-                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = stringResource(id = R.string.tap_to_enable),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
             itemsIndexed(disabledItems, key = { _, it -> it.key }) { subIndex, item ->
                 ListItemWithIcon(
                     modifier = Modifier
+                        .animateItem()
                         .clip(GroupItemShape(subIndex, disabledItems.size - 1))
                         .clickable {
                             disabledItems.remove(item)
                             enabledItems.add(item)
                         },
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     title = stringResource(id = item.titleResId),
                     startIcon = {
                         Image(
