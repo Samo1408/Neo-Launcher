@@ -91,6 +91,8 @@ open class ComposeSearchLayout(context: Context, attrs: AttributeSet? = null) :
 
     private val verticalOffset =
         resources.getDimensionPixelSize(R.dimen.all_apps_search_vertical_offset)
+    private val topMarginAdjustment =
+        resources.getDimensionPixelSize(R.dimen.all_apps_search_top_margin_adjustment)
     private var spController = SearchProviderController.getInstance(mContext)
     private val searchAlgorithm = NeoAppSearchAlgorithm(mContext, true)
     private val mSearchBarController: AllAppsSearchBarController = AllAppsSearchBarController()
@@ -326,7 +328,12 @@ open class ComposeSearchLayout(context: Context, attrs: AttributeSet? = null) :
         val mlp = layoutParams as MarginLayoutParams
         val isEnabled = prefs.searchDrawerEnabled.getValue()
         if (isEnabled) {
-            mlp.topMargin = insets.top
+            val deviceProfile = context.launcher.deviceProfile
+            mlp.topMargin = insets.top + if (!deviceProfile.shouldShowAllAppsOnSheet()) {
+                topMarginAdjustment
+            } else {
+                0
+            }
         } else {
             mlp.topMargin = verticalOffset
         }
