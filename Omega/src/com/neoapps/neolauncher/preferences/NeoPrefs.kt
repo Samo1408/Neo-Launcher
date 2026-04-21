@@ -653,10 +653,22 @@ class NeoPrefs private constructor(val context: Context) {
         dataStore = dataStore,
         key = PrefKey.DRAWER_PROTECTED_APPS_ENABLED,
         titleId = R.string.enable_protected_apps,
-        defaultValue = false
-    ) {
-        pokeChange()
-    }
+        defaultValue = false,
+        confirmAction = { context, newValue, successRunnable ->
+            if (!newValue) {
+                Config.showLockScreen(
+                    context,
+                    context.resources.getString(R.string.trust_apps_manager_name),
+                    successRunnable
+                )
+            } else {
+                successRunnable.run()
+            }
+        },
+        onChange = {
+            pokeChange()
+        }
+    )
 
     /*
     private val drawerGridSizeDelegate = ResettableLazy {

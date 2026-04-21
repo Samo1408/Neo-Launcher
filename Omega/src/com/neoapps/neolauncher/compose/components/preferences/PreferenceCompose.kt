@@ -61,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -341,6 +342,21 @@ fun SwitchPreference(
 ) {
     val (checked, check) = remember(pref) { mutableStateOf(pref.getValue()) }
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val onToggle = { newValue: Boolean ->
+        val update = {
+            onCheckedChange(newValue)
+            check(newValue)
+            coroutineScope.launch { pref.setValue(newValue) }
+            Unit
+        }
+        if (pref.confirmAction != null) {
+            pref.confirmAction(context, newValue, update)
+        } else {
+            update()
+        }
+    }
 
     BasePreference(
         modifier = modifier,
@@ -350,9 +366,7 @@ fun SwitchPreference(
         groupSize = groupSize,
         isEnabled = isEnabled,
         onClick = {
-            onCheckedChange(!checked)
-            check(!checked)
-            coroutineScope.launch { pref.setValue(!checked) }
+            onToggle(!checked)
         },
         endWidget = {
             Switch(
@@ -360,9 +374,7 @@ fun SwitchPreference(
                     .height(24.dp),
                 checked = checked,
                 onCheckedChange = {
-                    onCheckedChange(it)
-                    check(it)
-                    coroutineScope.launch { pref.setValue(it) }
+                    onToggle(it)
                 },
                 thumbContent = {
                     if (checked) {

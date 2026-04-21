@@ -45,6 +45,7 @@ open class BooleanPref(
     dataStore: DataStore<Preferences>,
     key: Preferences.Key<Boolean>,
     defaultValue: Boolean = false,
+    val confirmAction: ((Context, Boolean, Runnable) -> Unit)? = null,
     onChange: (Boolean) -> Unit = {}
 ) : PrefDelegate<Boolean>(titleId, summaryId, dataStore, key, defaultValue, onChange)
 
