@@ -31,7 +31,7 @@ public final class FeatureFlagsImpl implements FeatureFlags {
 
 
     public boolean allAppsSheetForHandheld() {
-        return true;
+        return false;
     }
 
     @Override

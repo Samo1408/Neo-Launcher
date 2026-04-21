@@ -104,14 +104,16 @@ fun DrawerPrefsPage() {
                 prefs.drawerEnableProtectedApps,
                 if (prefs.drawerEnableProtectedApps.getValue())
                     prefs.drawerProtectedAppsSet
-                else null
-                /*prefs.drawerCustomBackground,
+                else {
+                    null
+                },
+                prefs.drawerCustomBackground,
                 if (prefs.drawerCustomBackground.getValue()) {
                     prefs.drawerBackgroundColor
                 } else {
                     null
                 },
-                prefs.drawerBackgroundOpacity*/
+                prefs.drawerBackgroundOpacity
             ).toTypedArray()
         )
     }
