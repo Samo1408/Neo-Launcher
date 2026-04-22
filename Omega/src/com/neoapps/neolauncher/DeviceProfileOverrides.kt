@@ -1,21 +1,33 @@
 package com.neoapps.neolauncher
 
 import android.content.Context
+import com.android.launcher3.InvariantDeviceProfile
+import com.android.launcher3.InvariantDeviceProfile.INDEX_DEFAULT
+import com.android.launcher3.InvariantDeviceProfile.INDEX_LANDSCAPE
+import com.android.launcher3.InvariantDeviceProfile.INDEX_TWO_PANEL_LANDSCAPE
+import com.android.launcher3.InvariantDeviceProfile.INDEX_TWO_PANEL_PORTRAIT
+import com.android.launcher3.util.DisplayController
+import com.neoapps.neolauncher.preferences.NeoPrefs
+import org.koin.java.KoinJavaComponent.getKoin
+import org.koin.java.KoinJavaComponent.inject
 
 class DeviceProfileOverrides(context: Context) {
-    /*private val prefs: NeoPrefs by inject(NeoPrefs::class.java)
+    private val prefs: NeoPrefs by inject(NeoPrefs::class.java)
 
     private val predefinedGrids =
-        InvariantDeviceProfile.INSTANCE.get(context).parseAllGridOptions(context)
-        .map { option ->
-            val gridInfo = DBGridInfo(
-                numHotseatIcons = option.numHotseatIcons,
-                numHotseatRows = option.numHotseatIcons, //option.numHotseatRows TODO Fix
-                numRows = option.numRows,
-                numColumns = option.numColumns
-            )
-            gridInfo to option.name
-        }
+        InvariantDeviceProfile.parseAllDefinedGridOptions(
+            context,
+            DisplayController.INSTANCE.get(context).info
+        )
+            .map { option ->
+                val gridInfo = DBGridInfo(
+                    numHotseatIcons = option.numHotseatIcons,
+                    numHotseatRows = option.numHotseatIcons, //option.numHotseatRows TODO Fix
+                    numRows = option.numRows,
+                    numColumns = option.numColumns
+                )
+                gridInfo to option.name
+            }
 
     fun getGridInfo() = DBGridInfo(prefs)
 
@@ -72,7 +84,10 @@ class DeviceProfileOverrides(context: Context) {
         val iconSizeFactor: Float,
         val allAppsIconSizeFactor: Float,
 
-        val enableTaskbarOnPhone: Boolean
+        val enableTaskbarOnPhone: Boolean,
+        val numDesktopRows: Int,
+        val numDesktopColumns: Int,
+        val numHotseatIcons: Int,
     ) {
         constructor(
             prefs: NeoPrefs,
@@ -85,17 +100,35 @@ class DeviceProfileOverrides(context: Context) {
             iconSizeFactor = prefs.desktopIconScale.getValue(),
             allAppsIconSizeFactor = prefs.drawerIconScale.getValue(),
 
-            enableTaskbarOnPhone = false,
+            enableTaskbarOnPhone = false, // TODO pref for this
+            numDesktopRows = prefs.desktopGridRows.get(defaultGrid),
+            numDesktopColumns = prefs.desktopGridColumns.get(defaultGrid),
+            numHotseatIcons = prefs.dockNumIcons.get(defaultGrid),
         )
 
         fun applyUi(idp: InvariantDeviceProfile) {
-            // apply grid size
+            // grid sizes
+            idp.numRows = numDesktopRows
+            idp.numColumns = numDesktopColumns
+            idp.numSearchContainerColumns = numDesktopColumns
+
+            idp.numShownHotseatIcons = numHotseatIcons
+            idp.numDatabaseHotseatIcons =
+                if (idp.deviceType == InvariantDeviceProfile.TYPE_MULTI_DISPLAY) {
+                    numHotseatIcons * 2
+                } else {
+                    numHotseatIcons
+                }
+
+            // Set dbFile to match custom grid dimensions
+            idp.dbFile = "launcher_${numDesktopRows}_${numDesktopColumns}_${numHotseatIcons}.db"
+
             idp.numAllAppsColumns = numAllAppsColumns
             idp.numDatabaseAllAppsColumns = numAllAppsColumns
             idp.numFolderRows[INDEX_DEFAULT] = numFolderRows
             idp.numFolderColumns[INDEX_DEFAULT] = numFolderColumns
 
-            // apply icon and text size
+            // apply icon and text size multipliers
             idp.iconSize[INDEX_DEFAULT] *= iconSizeFactor
             idp.iconSize[INDEX_LANDSCAPE] *= iconSizeFactor
             idp.iconSize[INDEX_TWO_PANEL_PORTRAIT] *= iconSizeFactor
@@ -129,7 +162,7 @@ class DeviceProfileOverrides(context: Context) {
     }
 
     companion object {
-        @JvmField
-        val INSTANCE = MainThreadInitializedObject(::DeviceProfileOverrides)
-    }*/
+        @JvmStatic
+        fun getInstance(): DeviceProfileOverrides = getKoin().get()
+    }
 }
