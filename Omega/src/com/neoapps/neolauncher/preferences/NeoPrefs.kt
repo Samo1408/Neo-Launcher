@@ -27,8 +27,10 @@ import android.provider.Settings
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.android.launcher3.LauncherAppState
+import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.Utilities.makeComponentKey
@@ -39,6 +41,7 @@ import com.android.launcher3.settings.SettingsActivity
 import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.SettingsCache
 import com.android.launcher3.util.Themes
+import com.neoapps.neolauncher.DeviceProfileOverrides
 import com.neoapps.neolauncher.compose.navigation.NavRoute
 import com.neoapps.neolauncher.compose.views.IconShapeIcon
 import com.neoapps.neolauncher.dash.actionprovider.DeviceSettings
@@ -74,9 +77,11 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -359,7 +364,7 @@ class NeoPrefs private constructor(val context: Context) {
     val desktopPopupUninstall: Boolean
         get() = desktopPopup.getValue().contains(PREFS_DESKTOP_POPUP_UNINSTALL)
 
-    /*private var desktopGridSizeDelegate = ResettableLazy {
+    private var desktopGridSizeDelegate = ResettableLazy {
         GridSize2D(
             titleId = R.string.title__desktop_grid_size,
             numColumnsPref = desktopGridColumns,
@@ -394,7 +399,7 @@ class NeoPrefs private constructor(val context: Context) {
         maxValue = 16f,
         steps = 13,
         onChange = { reloadGrid() },
-    )*/
+    )
 
     var desktopFolderCornerRadius = FloatPref(
         dataStore = dataStore,
@@ -456,26 +461,26 @@ class NeoPrefs private constructor(val context: Context) {
         navRoute = NavRoute.Desktop.FolderStroke(),
         onChange = { reloadGrid() },
     )
-    /*
-        val desktopFolderColumns = IntPref(
-            dataStore = dataStore,
-            key = PrefKey.DESKTOP_FOLDER_COLUMNS,
-            titleId = R.string.folder_columns,
-            defaultValue = 4,
-            minValue = 2,
-            maxValue = 5,
-            steps = 2,
-        )
 
-        val desktopFolderRows = IntPref(
-            dataStore = dataStore,
-            key = PrefKey.DESKTOP_FOLDER_ROWS,
-            titleId = R.string.folder_rows,
-            defaultValue = 4,
-            minValue = 2,
-            maxValue = 5,
-            steps = 2,
-        )*/
+    val desktopFolderColumns = IntPref(
+        dataStore = dataStore,
+        key = PrefKey.DESKTOP_FOLDER_COLUMNS,
+        titleId = R.string.folder_columns,
+        defaultValue = 4,
+        minValue = 2,
+        maxValue = 5,
+        steps = 2,
+    )
+
+    val desktopFolderRows = IntPref(
+        dataStore = dataStore,
+        key = PrefKey.DESKTOP_FOLDER_ROWS,
+        titleId = R.string.folder_rows,
+        defaultValue = 4,
+        minValue = 2,
+        maxValue = 5,
+        steps = 2,
+    )
 
     val desktopFolderOpacity = FloatPref(
         dataStore = dataStore,
@@ -584,13 +589,12 @@ class NeoPrefs private constructor(val context: Context) {
         defaultValue = true,
         onChange = { recreate() },
     )
-    /*
 
     private val dockGridSizeDelegate = ResettableLazy {
         GridSize(
             titleId = R.string.title__dock_hotseat_icons,
             numColumnsPref = dockNumIcons,
-            columnsKey = "numHotseatIcons",
+            columnsKey = "numShownHotseatIcons",
             targetObject = LauncherAppState.getIDP(context),
             onChangeListener = { reloadGrid() }
         )
@@ -617,7 +621,7 @@ class NeoPrefs private constructor(val context: Context) {
         maxValue = 3,
         steps = 3,
         onChange = { reloadGrid() },
-    )*/
+    )
 
     // Drawer
     var drawerSortMode = IntSelectionPref(
@@ -670,7 +674,6 @@ class NeoPrefs private constructor(val context: Context) {
         }
     )
 
-    /*
     private val drawerGridSizeDelegate = ResettableLazy {
         GridSize(
             titleId = R.string.title__drawer_columns,
@@ -692,7 +695,7 @@ class NeoPrefs private constructor(val context: Context) {
         steps = 13,
         onChange = { reloadGrid() }
     )
-*/
+
     var drawerPopup = StringMultiSelectionPref(
         dataStore = dataStore,
         key = PrefKey.DRAWER_POPUP_OPTIONS,
@@ -1340,6 +1343,7 @@ class NeoPrefs private constructor(val context: Context) {
         val prefsModule = module {
             single { NeoPrefs(get()) }
             single { provideDataStore(get()) }
+            single { DeviceProfileOverrides(get()) }
         }
 
         private fun provideDataStore(context: Context): DataStore<Preferences> {

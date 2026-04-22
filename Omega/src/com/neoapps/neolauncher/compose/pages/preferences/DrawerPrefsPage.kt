@@ -74,9 +74,9 @@ fun DrawerPrefsPage() {
     val gridPrefs = remember(prefs.changePoker.collectAsState(initial = 1).value) {
         mutableStateListOf(
             *listOfNotNull(
-        //prefs.drawerGridSize,
+                prefs.drawerGridSize,
                 prefs.drawerAppSuggestions,
-        prefs.drawerSortMode,
+                prefs.drawerSortMode,
                 prefs.drawerLayout,
                 if (prefs.drawerLayout.getValue() == LAYOUT_CATEGORIES) {
                     prefs.categoriesLayout
