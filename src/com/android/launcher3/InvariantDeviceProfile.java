@@ -83,6 +83,8 @@ import com.android.launcher3.util.WindowBounds;
 import com.android.launcher3.util.window.CachedDisplayInfo;
 import com.android.launcher3.util.window.WindowManagerProxy;
 
+import com.neoapps.neolauncher.DeviceProfileOverrides;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -153,8 +155,12 @@ public class InvariantDeviceProfile {
      * Number of icons per row and column in the workspace.
      */
     public int numRows;
+    public int numRowsOriginal;
     public int numColumns;
+    public int numColumnsOriginal;
+    // TODO add respective pref in NeoPref
     public int numSearchContainerColumns;
+    public int numSearchContainerColumnsOriginal;
 
     /**
      * Number of icons per row and column in the folder.
@@ -192,6 +198,7 @@ public class InvariantDeviceProfile {
      * Number of icons inside the hotseat area.
      */
     public int numShownHotseatIcons;
+    public int numShownHotseatIconsOriginal;
 
     /**
      * Number of icons inside the hotseat area that is stored in the database. This is greater than
@@ -207,6 +214,7 @@ public class InvariantDeviceProfile {
      * Number of columns in the all apps list.
      */
     public int numAllAppsColumns;
+    public int numAllAppsColumnsOriginal;
     public int numAllAppsRowsForCellHeightCalculation;
     public int numDatabaseAllAppsColumns;
     public @StyleRes int allAppsStyle;
@@ -389,8 +397,15 @@ public class InvariantDeviceProfile {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         GridOption closestProfile = displayOption.grid;
         numRows = closestProfile.numRows;
+        numRowsOriginal = closestProfile.numRows;
         numColumns = closestProfile.numColumns;
+        numColumnsOriginal = closestProfile.numColumns;
         numSearchContainerColumns = closestProfile.numSearchContainerColumns;
+        numSearchContainerColumnsOriginal = closestProfile.numSearchContainerColumns;
+        numShownHotseatIcons = closestProfile.numHotseatIcons;
+        numShownHotseatIconsOriginal = closestProfile.numHotseatIcons;
+        numAllAppsColumns = closestProfile.numAllAppsColumns;
+        numAllAppsColumnsOriginal = closestProfile.numAllAppsColumns;
         dbFile = closestProfile.dbFile;
         gridType = closestProfile.gridType;
         defaultLayoutId = closestProfile.defaultLayoutId;
@@ -472,6 +487,11 @@ public class InvariantDeviceProfile {
         // Supported overrides: numRows, numColumns, iconSize
         applyPartnerDeviceProfileOverrides(context, metrics);
 
+        // Apply Neo Launcher custom grid overrides
+        DeviceProfileOverrides overrides = DeviceProfileOverrides.getInstance();
+        DeviceProfileOverrides.Options neoOptions = overrides.getOverrides(closestProfile);
+        neoOptions.applyUi(this);
+
         final List<DeviceProfile> localSupportedProfiles = new ArrayList<>();
         defaultWallpaperSize = new Point(displayInfo.currentSize);
         SparseArray<DotRenderer> dotRendererCache = new SparseArray<>();
@@ -538,6 +558,7 @@ public class InvariantDeviceProfile {
     public void setCurrentGrid(String newGridName) {
         if (TextUtils.equals(mPrefs.get(GRID_NAME), newGridName)) return;
         mPrefs.put(GRID_NAME, newGridName);
+        DeviceProfileOverrides.getInstance().setCurrentGrid(newGridName);
         mMainExecutor.execute(() -> {
             Trace.beginSection("InvariantDeviceProfile#setCurrentGrid");
             onConfigChanged();
