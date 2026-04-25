@@ -20,6 +20,7 @@ package com.neoapps.neolauncher.groups.category
 
 import android.content.Context
 import com.android.launcher3.R
+import com.android.launcher3.allapps.AlphabeticalAppsList
 import com.android.launcher3.model.ModelWriter
 import com.android.launcher3.model.data.AppInfo
 import com.android.launcher3.util.ComponentKey
@@ -62,11 +63,11 @@ class DrawerFolders(val manager: AppGroupsManager) :
     override fun getDefaultCreators(): List<GroupCreator<Folder>> {
         return emptyList()
     }
-    /*
-    fun getFolderInfos(apps: AlphabeticalAppsList<*>, modelWriter: ModelWriter) =
+
+    fun getFolderInfos(apps: AlphabeticalAppsList, modelWriter: ModelWriter) =
         getFolderInfos(buildAppsMap(apps)::get, modelWriter)
 
-    private fun buildAppsMap(apps: AlphabeticalAppsList<*>): Map<ComponentKey, AppInfo> {
+    private fun buildAppsMap(apps: AlphabeticalAppsList): Map<ComponentKey, AppInfo> {
         // Copy the list before accessing it to prevent concurrent list access
         return apps.apps.toList().associateBy { it.toComponentKey() }
     }
@@ -78,7 +79,7 @@ class DrawerFolders(val manager: AppGroupsManager) :
         .asSequence()
         .filter { !it.isEmpty }
         .map { it.toFolderInfo(getAppInfo, modelWriter) }
-        .toList()*/
+        .toList()
 
     fun getHiddenComponents() = getGroups()
         .asSequence()

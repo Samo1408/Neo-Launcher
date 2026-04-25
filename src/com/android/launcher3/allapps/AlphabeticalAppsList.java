@@ -37,12 +37,18 @@ import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.DiffUtil;
 
 import com.android.launcher3.Flags;
+import com.android.launcher3.LauncherAppState;
+import com.android.launcher3.LauncherModel;
 import com.android.launcher3.R;
 import com.android.launcher3.allapps.BaseAllAppsAdapter.AdapterItem;
+import com.android.launcher3.celllayout.CellPosMapper;
+import com.android.launcher3.model.ModelWriter;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.LabelComparator;
 import com.android.launcher3.views.ActivityContext;
+import com.neoapps.neolauncher.groups.category.DrawerFolderInfo;
 import com.neoapps.neolauncher.preferences.NeoPrefs;
 
 import java.io.PrintWriter;
@@ -52,6 +58,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -367,6 +374,24 @@ public class AlphabeticalAppsList implements AllAppsStore.OnUpdateListener {
         }
     }
 
+    public List<AppInfo> getApps() {
+        return mApps;
+    }
+
+    private List<DrawerFolderInfo> getFolderInfos() {
+        LauncherAppState app = LauncherAppState.getInstance(mActivityContext.asContext());
+        LauncherModel model = app.getModel();
+        ModelWriter modelWriter = model.getWriter(false, CellPosMapper.DEFAULT, null);
+        return prefs.getDrawerAppGroupsManager()
+                .getDrawerFolders()
+                .getFolderInfos(this, modelWriter);
+    }
+
+    private Set<ComponentKey> getFolderFilteredApps() {
+        return prefs.getDrawerAppGroupsManager()
+                .getDrawerFolders()
+                .getHiddenComponents();
+    }
     int addPrivateSpaceItems(int position) {
         if (mPrivateProviderManager != null
                 && !mPrivateProviderManager.isPrivateSpaceHidden()
