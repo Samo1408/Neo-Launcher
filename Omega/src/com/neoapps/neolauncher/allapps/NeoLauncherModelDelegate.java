@@ -88,7 +88,6 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
     final PredictorState mHotseatPredictionState = new PredictorState(
             CONTAINER_HOTSEAT_PREDICTION, "hotseat_predictions", DESKTOP_ICON_FLAG);
     @VisibleForTesting
-    @Deprecated // unused with the Flag.enableWidgetPickerRefactor enabled
     final PredictorState mWidgetsRecommendationState = new PredictorState(
             CONTAINER_WIDGETS_PREDICTION, "widgets_prediction", DESKTOP_ICON_FLAG);
 
@@ -124,10 +123,8 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
 
     @Override
     public void loadAndAddExtraModelItems(@NonNull IntSparseArrayMap<ItemInfo> outLoadedItems) {
-        loadAndBindPredictedItems(
-                mIDP.numDatabaseHotseatIcons, mHotseatPredictionState, outLoadedItems);
-        loadAndBindPredictedItems(mIDP.numDatabaseAllAppsColumns, mAllPredictionAppsState,
-                outLoadedItems);
+        loadAndBindPredictedItems(mIDP.numShownHotseatIcons, mHotseatPredictionState, outLoadedItems);
+        loadAndBindPredictedItems(mIDP.numAllAppsColumns, mAllPredictionAppsState, outLoadedItems);
 
         // Widgets prediction isn't used frequently. And thus, it is not persisted on disk.
         PredictedContainerInfo widgetPredictionFCI = new PredictedContainerInfo(
@@ -260,7 +257,7 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
 
         MODEL_EXECUTOR.execute(() -> {
             AppTrackerRepository repo = AppTrackerRepository.Companion.getINSTANCE().get(mContext);
-            List<AppTracker> recentApps = repo.getRecentApps(mIDP.numDatabaseAllAppsColumns);
+            List<AppTracker> recentApps = repo.getRecentApps(mIDP.numAllAppsColumns);
             List<android.app.prediction.AppTarget> targets = new ArrayList<>();
             android.content.pm.LauncherApps launcherApps = mContext.getSystemService(android.content.pm.LauncherApps.class);
 
@@ -292,15 +289,15 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
     private void recreateHotseatPredictor() {
         mHotseatPredictionState.destroyPredictor();
         if (mActive) {
-            registerHotseatPredictor(mContext);
+            registerHotSeatPredictor(mContext);
         }
     }
 
-    private void registerHotseatPredictor(Context context) {
+    private void registerHotSeatPredictor(Context context) {
         mHotseatPredictionState.registerPredictor(context,
                 new AppPredictionContext.Builder(context)
                         .setUiSurface("hotseat")
-                        .setPredictedTargetCount(mIDP.numDatabaseHotseatIcons)
+                        .setPredictedTargetCount(mIDP.numAllAppsColumns)
                         .setExtras(getBundleForHotseatPredictions(context, mDataModel))
                         .build(),
                 mModel, PredictionUpdateTask::new);
@@ -320,8 +317,6 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
         if (state == mHotseatPredictionState
                 && (event.getAction() == AppTargetEvent.ACTION_PIN
                 || event.getAction() == AppTargetEvent.ACTION_UNPIN)) {
-            // Recreate hot seat predictor when we need to query for hot seat due to pin or
-            // unpin app icons.
             recreateHotseatPredictor();
         }
     }
