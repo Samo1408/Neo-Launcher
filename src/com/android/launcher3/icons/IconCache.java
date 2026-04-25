@@ -138,6 +138,32 @@ public class IconCache extends BaseIconCache {
         lifecycle.addCloseable(this::close);
     }
 
+    public IconCache(
+            @ApplicationContext Context context,
+            InvariantDeviceProfile idp,
+            @Nullable @Named("ICONS_DB") String dbFileName,
+            UserCache userCache,
+            IconProvider iconProvider,
+            InstallSessionHelper installSessionHelper,
+            LauncherIcons.IconPool iconPool,
+            DaggerSingletonTracker lifecycle) {
+        super(context, dbFileName, MODEL_EXECUTOR.getLooper(),
+                idp.fillResIconDpi, Math.max(idp.iconBitmapSize, idp.allAppsIconBitmapSize), true /* inMemoryCache */, iconProvider);
+        mLauncherApps = context.getSystemService(LauncherApps.class);
+        mUserManager = userCache;
+        mInstallSessionHelper = installSessionHelper;
+        mIconPool = iconPool;
+
+        mInstantAppResolver = InstantAppResolver.newInstance(context);
+        mWidgetCategoryBitmapInfos = new SparseArray<>();
+
+        mCancelledTask = new CancellableTask(() -> null, MAIN_EXECUTOR, c -> {
+        });
+        mCancelledTask.cancel();
+
+        lifecycle.addCloseable(this::close);
+    }
+
     @Override
     public long getSerialNumberForUser(@NonNull UserHandle user) {
         return mUserManager.getSerialNumberForUser(user);
@@ -160,10 +186,12 @@ public class IconCache extends BaseIconCache {
     public synchronized void updateIconsForPkg(@NonNull final String packageName,
                                                @NonNull final UserHandle user) {
         List<LauncherActivityInfo> apps = mLauncherApps.getActivityList(packageName, user);
-        if (Flags.restoreArchivedAppIconsFromDb()
-                && apps.stream().anyMatch(app -> app.getApplicationInfo().isArchived)) {
-            // When archiving app icon, don't delete old icon so it can be re-used.
-            return;
+        if (Utilities.ATLEAST_V) {
+            if (Flags.restoreArchivedAppIconsFromDb()
+                    && apps.stream().anyMatch(app -> app.getApplicationInfo().isArchived)) {
+                // When archiving app icon, don't delete old icon so it can be re-used.
+                return;
+            }
         }
         removeIconsForPkg(packageName, user);
         long userSerial = mUserManager.getSerialNumberForUser(user);
@@ -252,8 +280,8 @@ public class IconCache extends BaseIconCache {
     @SuppressWarnings("NewApi")
     public synchronized void getTitleAndIcon(ItemInfoWithIcon info,
                                              LauncherActivityInfo activityInfo, @NonNull CacheLookupFlag lookupFlag) {
-        boolean isAppArchived = Utilities.ATLEAST_V && (Flags.enableSupportForArchiving() && activityInfo != null
-                && activityInfo.getActivityInfo().isArchived);
+        boolean isAppArchived = Flags.enableSupportForArchiving() && activityInfo != null
+                && activityInfo.getActivityInfo().isArchived;
         // If we already have activity info, no need to use package icon
         getTitleAndIcon(info, () -> activityInfo, lookupFlag.withUsePackageIcon(isAppArchived));
     }

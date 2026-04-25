@@ -82,7 +82,6 @@ import com.android.launcher3.util.TaskbarModeUtil;
 import com.android.launcher3.util.WindowBounds;
 import com.android.launcher3.util.window.CachedDisplayInfo;
 import com.android.launcher3.util.window.WindowManagerProxy;
-
 import com.neoapps.neolauncher.DeviceProfileOverrides;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -170,6 +169,7 @@ public class InvariantDeviceProfile {
     public float[] iconSize;
     public float[] iconTextSize;
     public int iconBitmapSize;
+    public int allAppsIconBitmapSize;
     public int fillResIconDpi;
     public @DeviceType int deviceType;
     public Info displayInfo;
@@ -440,13 +440,19 @@ public class InvariantDeviceProfile {
         inlineNavButtonsEndSpacing = closestProfile.inlineNavButtonsEndSpacing;
 
         iconSize = displayOption.iconSizes;
+        allAppsIconSize = displayOption.allAppsIconSizes;
         float maxIconSize = iconSize[0];
         for (int i = 1; i < iconSize.length; i++) {
             maxIconSize = Math.max(maxIconSize, iconSize[i]);
         }
+        float maxAllAppsIconSize = allAppsIconSize[0];
+        for (int i = 1; i < allAppsIconSize.length; i++) {
+            maxAllAppsIconSize = Math.max(maxAllAppsIconSize, allAppsIconSize[i]);
+        }
         iconBitmapSize = ResourceUtils.pxFromDp(maxIconSize, metrics);
+        allAppsIconBitmapSize = ResourceUtils.pxFromDp(maxAllAppsIconSize, metrics);
 
-        fillResIconDpi = getLauncherIconDensity(iconBitmapSize);
+        fillResIconDpi = getLauncherIconDensity(Math.max(iconBitmapSize, allAppsIconBitmapSize));
 
         iconTextSize = displayOption.textSizes;
 
@@ -569,7 +575,7 @@ public class InvariantDeviceProfile {
     private Object[] toModelState() {
         return new Object[]{
                 numColumns, numRows, numSearchContainerColumns, numDatabaseHotseatIcons,
-                iconBitmapSize, fillResIconDpi, numDatabaseAllAppsColumns, dbFile, mLocale};
+                iconBitmapSize, allAppsIconBitmapSize, fillResIconDpi, numDatabaseAllAppsColumns, dbFile, mLocale};
     }
 
     /** Updates IDP using the provided context. Notifies listeners of change. */

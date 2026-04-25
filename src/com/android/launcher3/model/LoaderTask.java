@@ -213,7 +213,7 @@ public class LoaderTask implements Runnable {
         mPmHelper = pmHelper;
         mSessionHelper = sessionHelper;
         mIconCache = iconCache;
-        mInstallingPkgsCached = null;
+        mInstallingPkgsCached = mSessionHelper.getActiveSessions();
         mFolderNameProviderFactory = folderNameProviderFactory;
         mRestoreEventLoggerProvider = restoreEventLoggerFactory;
         mExtraItemsProvider = extraItemsProvider;
@@ -265,12 +265,8 @@ public class LoaderTask implements Runnable {
             logASplit("Sending first screen broadcast with shouldAttachArchivingExtras="
                     + shouldAttachArchivingExtras);
             broadcastModels.forEach(bm -> bm.sentBroadcast(mContext));
-        } else {
-            logASplit("Sending first screen broadcast");
-            //mFirstScreenBroadcastHelper.sendBroadcasts(mContext, firstScreenItems);
         }
     }
-
 
     private void loadAllSurfacesOrdered(
             LoaderMemoryLogger memoryLogger, LauncherRestoreEventLogger restoreEventLogger) {
