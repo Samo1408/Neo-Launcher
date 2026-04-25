@@ -1204,6 +1204,13 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
             }
         }
 
+        View categoriesBar = findViewById(R.id.categories_bar);
+        if (categoriesBar != null && categoriesBar.getVisibility() == VISIBLE) {
+            if (isEventOverView(categoriesBar, ev)) {
+                return false;
+            }
+        }
+
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             AllAppsRecyclerView rv = getActiveRecyclerView();
             if (rv != null && rv.getScrollbar() != null
