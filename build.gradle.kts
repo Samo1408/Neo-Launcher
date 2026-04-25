@@ -211,7 +211,7 @@ android {
                 listOf(
                     "src",
                     "src_plugins",
-                    "shared",
+                    "shared/src",
                     "src_no_quickstep",
                     "compose"
                 )
@@ -220,7 +220,7 @@ android {
                 listOf(
                     "src",
                     "src_plugins",
-                    "shared",
+                    "shared/src",
                     "src_no_quickstep",
                     "compose"
                 )
