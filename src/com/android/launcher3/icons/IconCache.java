@@ -56,7 +56,6 @@ import com.android.launcher3.icons.cache.BaseIconCache;
 import com.android.launcher3.icons.cache.CacheLookupFlag;
 import com.android.launcher3.icons.cache.CachedObject;
 import com.android.launcher3.icons.cache.CachedObjectCachingLogic;
-import com.android.launcher3.icons.cache.LauncherActivityCachingLogic;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.IconRequestInfo;
@@ -253,8 +252,8 @@ public class IconCache extends BaseIconCache {
     @SuppressWarnings("NewApi")
     public synchronized void getTitleAndIcon(ItemInfoWithIcon info,
                                              LauncherActivityInfo activityInfo, @NonNull CacheLookupFlag lookupFlag) {
-        boolean isAppArchived = Flags.enableSupportForArchiving() && activityInfo != null
-                && activityInfo.getActivityInfo().isArchived;
+        boolean isAppArchived = Utilities.ATLEAST_V && (Flags.enableSupportForArchiving() && activityInfo != null
+                && activityInfo.getActivityInfo().isArchived);
         // If we already have activity info, no need to use package icon
         getTitleAndIcon(info, () -> activityInfo, lookupFlag.withUsePackageIcon(isAppArchived));
     }

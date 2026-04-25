@@ -72,12 +72,12 @@ import com.android.launcher3.util.IntSparseArrayMap;
 import com.android.launcher3.util.PackageManagerHelper;
 import com.android.launcher3.util.UserIconInfo;
 
+import java.net.URISyntaxException;
+import java.security.InvalidParameterException;
+
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
-
-import java.net.URISyntaxException;
-import java.security.InvalidParameterException;
 
 /**
  * Extension of {@link Cursor} with utility methods for workspace loading.
@@ -425,7 +425,7 @@ public class LoaderCursor extends CursorWrapper {
             boolean loadIconFromCache,
             WorkspaceItemInfo info
     ) {
-        boolean isPreArchived = Flags.enableSupportForArchiving()
+        boolean isPreArchived = Utilities.ATLEAST_V && Flags.enableSupportForArchiving()
                 && Flags.restoreArchivedAppIconsFromDb()
                 && info.isInactiveArchive()
                 && LauncherPrefs.get(mContext).get(LauncherPrefs.IS_FIRST_LOAD_AFTER_RESTORE);

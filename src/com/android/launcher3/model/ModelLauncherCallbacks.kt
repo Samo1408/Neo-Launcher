@@ -22,6 +22,7 @@ import android.content.pm.ShortcutInfo
 import android.os.UserHandle
 import android.text.TextUtils
 import com.android.launcher3.LauncherModel.ModelUpdateTask
+import com.android.launcher3.config.FeatureFlags
 import com.android.launcher3.logging.FileLog
 import com.android.launcher3.model.tasks.CacheDataUpdatedTask
 import com.android.launcher3.model.tasks.PackageIncrementalDownloadUpdatedTask
@@ -127,7 +128,14 @@ class ModelLauncherCallbacks(private var taskExecutor: Consumer<ModelUpdateTask>
         )
     }
 
-    override fun onInstallSessionCreated(sessionInfo: PackageInstallInfo) {}
+    override fun onInstallSessionCreated(sessionInfo: PackageInstallInfo) {
+        if (FeatureFlags.PROMISE_APPS_IN_ALL_APPS.get()) {
+            taskExecutor.accept { taskController, _, apps ->
+                apps.addPromiseApp(taskController.context, sessionInfo)
+                taskController.bindApplicationsIfNeeded()
+            }
+        }
+    }
 
     companion object {
         private const val TAG = "LauncherAppsCallbackImpl"

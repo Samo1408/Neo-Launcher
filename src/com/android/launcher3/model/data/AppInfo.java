@@ -146,6 +146,17 @@ public class AppInfo extends ItemInfoWithIcon implements WorkspaceItemFactory {
         this.intent = intent;
     }
 
+    public AppInfo(@NonNull PackageInstallInfo installInfo) {
+        componentName = installInfo.componentName;
+        intent = new Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LAUNCHER)
+                .setComponent(componentName)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        setProgressLevel(installInfo);
+        user = installInfo.user;
+    }
+
     @Override
     protected String dumpProperties() {
         return super.dumpProperties() + " componentName=" + componentName;
@@ -209,11 +220,11 @@ public class AppInfo extends ItemInfoWithIcon implements WorkspaceItemFactory {
             info.runtimeStatusFlags &= ~FLAG_DISABLED_SUSPENDED;
         }
         if (Flags.enableSupportForArchiving()) {
-            /*if (activityInfo.isArchived) {
+            if (Utilities.ATLEAST_V && Flags.enableSupportForArchiving()) {
                 info.runtimeStatusFlags |= FLAG_ARCHIVED;
             } else {
                 info.runtimeStatusFlags &= ~FLAG_ARCHIVED;
-            }*/
+            }
 
             info.runtimeStatusFlags &= ~FLAG_ARCHIVED;
         }

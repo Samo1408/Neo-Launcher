@@ -29,6 +29,7 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.launcher3.Flags;
 import com.android.launcher3.compat.AlphabeticIndexCompat;
@@ -41,6 +42,7 @@ import com.android.launcher3.model.repository.AppsListRepository;
 import com.android.launcher3.pm.PackageInstallInfo;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.util.ApiWrapper;
+import com.android.launcher3.util.ApplicationInfoWrapper;
 import com.android.launcher3.util.FlagOp;
 import com.android.launcher3.util.PackageManagerHelper;
 import com.neoapps.neolauncher.allapps.HiddenAppFilter;
@@ -175,6 +177,35 @@ public class AllAppsList {
         data.add(info);
         mDataChanged = true;
     }
+
+    @Nullable
+    public AppInfo addPromiseApp(Context context, PackageInstallInfo installInfo) {
+        return addPromiseApp(context, installInfo, true);
+    }
+
+    @Nullable
+    public AppInfo addPromiseApp(
+            Context context, PackageInstallInfo installInfo, boolean loadIcon) {
+        // only if not yet installed
+        if (new ApplicationInfoWrapper(context, installInfo.packageName, installInfo.user)
+                .isInstalled()) {
+            return null;
+        }
+        AppInfo promiseAppInfo = new AppInfo(installInfo);
+
+        if (loadIcon) {
+            mIconCache.getTitleAndIcon(promiseAppInfo, promiseAppInfo.getMatchingLookupFlag());
+            promiseAppInfo.sectionName = mIndex.computeSectionName(promiseAppInfo.title);
+        } else {
+            promiseAppInfo.title = "";
+        }
+
+        data.add(promiseAppInfo);
+        mDataChanged = true;
+
+        return promiseAppInfo;
+    }
+
 
     public void updateSectionName(AppInfo appInfo) {
         appInfo.sectionName = mIndex.computeSectionName(appInfo.title);
