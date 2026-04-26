@@ -27,10 +27,8 @@ import android.provider.Settings
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.android.launcher3.LauncherAppState
-import com.android.launcher3.LauncherPrefs
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.Utilities.makeComponentKey
@@ -77,11 +75,9 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -521,7 +517,7 @@ class NeoPrefs private constructor(val context: Context) {
     )
 
     // Dock
-    var dockShow = BooleanPref(
+    var dockEnabled = BooleanPref(
         dataStore = dataStore,
         key = PrefKey.DOCK_ENABLED,
         titleId = R.string.title__dock_hide,

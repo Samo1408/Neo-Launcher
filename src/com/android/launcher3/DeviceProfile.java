@@ -690,8 +690,8 @@ public class DeviceProfile {
                     + hotseatBarBottomSpacePx;
         }
 
-        boolean isHotseatEnabled = NeoPrefs.getInstance().getDockShow().getValue();
-        if (!isHotseatEnabled) {
+        boolean dockEnabled = NeoPrefs.getInstance().getDockEnabled().getValue();
+        if (!dockEnabled) {
             hotseatBarSizePx = 0;
         }
     }

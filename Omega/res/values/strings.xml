@@ -83,7 +83,7 @@
     <string name="title_dock_fill">Show Background</string>
     <string name="title_dock_background_color">Background Color</string>
     <string name="title_dock_two_row">Show Second Row</string>
-    <string name="title__dock_hide">Dock Hide</string>
+    <string name="title__dock_hide">Dock Enabled</string>
     <string name="title_expandable_dock">Expandable Dock</string>
     <string name="title__dock_hide_labels">Hide Labels</string>
     <string name="title__dock_colored_icons">Colored icons</string>

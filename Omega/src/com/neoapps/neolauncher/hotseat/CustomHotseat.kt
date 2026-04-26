@@ -46,7 +46,7 @@ open class CustomHotseat @JvmOverloads constructor(
     val prefs by lazy { NeoPrefs.getInstance() }
 
     private var backgroundEnable = false
-    private var hotseatEnabled = prefs.dockShow.getValue()
+    private var hotseatEnabled = prefs.dockEnabled.getValue()
     private var radius = context.resources.getDimension(R.dimen.enforced_rounded_corner_max_radius)
     private var defaultRadius = radius
 
@@ -69,7 +69,7 @@ open class CustomHotseat @JvmOverloads constructor(
         combine(
             prefs.dockCustomBackground.get(),
             prefs.dockBackgroundColor.get(),
-            prefs.dockShow.get(),
+            prefs.dockEnabled.get(),
             prefs.profileWindowCornerRadius.get()
         ) { customBackground, color, show, dockRadius ->
             backgroundEnable = customBackground

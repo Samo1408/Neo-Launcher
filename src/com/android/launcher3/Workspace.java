@@ -1352,8 +1352,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     public void showPageIndicatorAtCurrentScroll() {
         if (mPageIndicator != null) {
             mPageIndicator.setScroll(getScrollX(), computeMaxScroll());
-            boolean isHotseatEnabled = NeoPrefs.getInstance().getDockShow().getValue();
-            mPageIndicator.setVisibility(isHotseatEnabled ? VISIBLE : INVISIBLE);
+            boolean isDockEnabled = NeoPrefs.getInstance().getDockEnabled().getValue();
+            mPageIndicator.setVisibility(isDockEnabled ? VISIBLE : INVISIBLE);
         }
     }
 

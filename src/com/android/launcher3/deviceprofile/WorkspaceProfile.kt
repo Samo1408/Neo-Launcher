@@ -33,6 +33,7 @@ import com.android.launcher3.responsive.CalculatedResponsiveSpec
 import com.android.launcher3.testing.shared.ResourceUtils
 import com.android.launcher3.util.CellContentDimensions
 import com.android.launcher3.util.IconSizeSteps
+import com.neoapps.neolauncher.preferences.NeoPrefs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -254,6 +255,7 @@ data class WorkspaceProfile(
             hotseatQsbSpace: Int,
             isQsbInline: Boolean,
         ): Int {
+            if (!NeoPrefs.getInstance().dockEnabled.getValue()) return 0
             return when {
                 isVerticalLayout -> {
                     (iconSizePx +

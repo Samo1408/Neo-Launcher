@@ -60,7 +60,7 @@ fun DockPrefsPage() {
     val dockPrefs = remember(prefs.changePoker.collectAsState(initial = 1).value) {
         mutableStateListOf(
             *listOfNotNull(
-                //prefs.dockHide,
+                prefs.dockEnabled,
                 prefs.dockGridSize,
                 prefs.dockCustomBackground,
                 if (prefs.dockCustomBackground.getValue()) {
