@@ -61,7 +61,7 @@ public class PackageInstallStateChangedTask implements ModelUpdateTask {
             } catch (PackageManager.NameNotFoundException e) {
                 // Ignore
             }
-            // Ignore install success events as they are handled by Package add events.
+            taskController.getModel().forceReload();
             return;
         }
 

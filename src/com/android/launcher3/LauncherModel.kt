@@ -110,6 +110,13 @@ constructor(
     private val mDataValidationCheck = Runnable {
         if (mModelLoaded) {
             modelDelegate.validateData()
+            if (!mBgAllAppsList.matchesLauncherApps(
+                    context,
+                    UserCache.INSTANCE[context].userProfiles
+                )
+            ) {
+                forceReload()
+            }
         }
     }
 

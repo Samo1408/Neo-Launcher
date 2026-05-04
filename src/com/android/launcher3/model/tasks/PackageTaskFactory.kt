@@ -62,6 +62,7 @@ object PackageTaskFactory {
             )
             // Remove any queued items from the install queue
             ItemInstallQueue.INSTANCE[taskController.context].removeFromInstallQueue(packages, user)
+            taskController.model.forceReload()
         }
 
     /** Task to handle apps being temporarily unavailable */

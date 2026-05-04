@@ -43,6 +43,7 @@ import com.android.launcher3.pm.PackageInstallInfo;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.util.ApiWrapper;
 import com.android.launcher3.util.ApplicationInfoWrapper;
+import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.FlagOp;
 import com.android.launcher3.util.PackageManagerHelper;
 import com.neoapps.neolauncher.allapps.HiddenAppFilter;
@@ -147,6 +148,30 @@ public class AllAppsList {
      */
     public AppsListData getImmutableData() {
         return new AppsListData(copyData(), mFlags);
+    }
+
+    /**
+     * Returns whether the in-memory app list still matches LauncherApps.
+     */
+    public boolean matchesLauncherApps(Context context, List<UserHandle> users) {
+        final LauncherApps launcherApps = context.getSystemService(LauncherApps.class);
+        final Set<ComponentKey> expectedApps = new HashSet<>();
+        for (UserHandle user : users) {
+            for (LauncherActivityInfo activityInfo : launcherApps.getActivityList(null, user)) {
+                ComponentName componentName = activityInfo.getComponentName();
+                if (mAppFilter.shouldShowApp(componentName)) {
+                    expectedApps.add(new ComponentKey(componentName, user));
+                }
+            }
+        }
+
+        final Set<ComponentKey> loadedApps = new HashSet<>();
+        for (AppInfo appInfo : data) {
+            if (appInfo.componentName != null) {
+                loadedApps.add(new ComponentKey(appInfo.componentName, appInfo.user));
+            }
+        }
+        return loadedApps.equals(expectedApps);
     }
 
     /**

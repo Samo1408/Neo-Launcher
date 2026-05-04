@@ -19,8 +19,16 @@ package com.android.launcher3.model
 import android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.Intent.ACTION_PACKAGE_ADDED
+import android.content.Intent.ACTION_PACKAGE_CHANGED
+import android.content.Intent.ACTION_PACKAGE_REMOVED
+import android.content.Intent.EXTRA_REPLACING
+import android.content.Intent.EXTRA_UID
 import android.content.pm.LauncherApps
 import android.content.pm.LauncherApps.ArchiveCompatibilityParams
+import android.os.Process
+import android.os.UserHandle
 import android.util.Log
 import androidx.annotation.WorkerThread
 import com.android.launcher3.BuildConfig
@@ -54,6 +62,7 @@ import com.android.launcher3.util.SettingsCache.NOTIFICATION_BADGING_URI
 import com.android.launcher3.util.SettingsCache.PRIVATE_SPACE_HIDE_WHEN_LOCKED_URI
 import com.android.launcher3.util.SimpleBroadcastReceiver
 import com.android.launcher3.util.SimpleBroadcastReceiver.Companion.actionsFilter
+import com.android.launcher3.util.SimpleBroadcastReceiver.Companion.packageFilter
 import com.android.launcher3.widget.custom.CustomWidgetManager
 import javax.inject.Inject
 
@@ -90,6 +99,24 @@ constructor(
             FileLog.d(TAG, "Unregistering modelCallbacks from LauncherApps")
             launcherApps.unregisterCallback(modelCallbacks)
         }
+
+        val packageUpdateReceiver =
+            SimpleBroadcastReceiver(
+                context = context,
+                executor = UI_HELPER_EXECUTOR,
+                callbackExecutor = MODEL_EXECUTOR,
+            ) { intent ->
+                handlePackageBroadcast(intent, model, modelCallbacks)
+            }
+        packageUpdateReceiver.register(
+            packageFilter(
+                null,
+                ACTION_PACKAGE_ADDED,
+                ACTION_PACKAGE_CHANGED,
+                ACTION_PACKAGE_REMOVED
+            )
+        )
+        lifeCycle.addCloseable(packageUpdateReceiver)
 
         if (Utilities.ATLEAST_V && Flags.enableSupportForArchiving()) {
             launcherApps.setArchiveCompatibility(
@@ -206,6 +233,36 @@ constructor(
                     )
                 }
             }
+    }
+
+    private fun handlePackageBroadcast(
+        intent: Intent,
+        model: LauncherModel,
+        modelCallbacks: ModelLauncherCallbacks,
+    ) {
+        val packageName = intent.data?.schemeSpecificPart ?: return
+        val user = intent.getIntExtra(EXTRA_UID, -1)
+            .takeIf { it != -1 }
+            ?.let(UserHandle::getUserHandleForUid)
+            ?: Process.myUserHandle()
+
+        when (intent.action) {
+            ACTION_PACKAGE_ADDED -> {
+                if (intent.getBooleanExtra(EXTRA_REPLACING, false)) {
+                    modelCallbacks.onPackageChanged(packageName, user)
+                } else {
+                    modelCallbacks.onPackageAdded(packageName, user)
+                }
+            }
+
+            ACTION_PACKAGE_CHANGED -> modelCallbacks.onPackageChanged(packageName, user)
+            ACTION_PACKAGE_REMOVED -> {
+                if (!intent.getBooleanExtra(EXTRA_REPLACING, false)) {
+                    modelCallbacks.onPackageRemoved(packageName, user)
+                }
+            }
+        }
+        model.forceReload()
     }
 
     companion object {
