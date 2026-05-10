@@ -68,15 +68,20 @@ fun ProfilePrefsPage() {
         prefs.profileLanguage,
         /*prefs.profileTheme,
         prefs.profileAccentColor,*/
+    )
+
+    val iconPrefs = listOfNotNull(
         prefs.profileIconPack,
         prefs.profileIconShape,
-        /*
-                if (customIconsCount > 0) {
-                    prefs.profileResetCustomIcons
-                } else {
-                    null
-                }*/
+        prefs.profileIconAdaptify,
+        prefs.profileIconColoredBackground,
+        if (customIconsCount > 0) {
+            prefs.profileResetCustomIcons
+        } else {
+            null
+        }
     )
+
     val others = remember(prefs.changePoker.collectAsState(initial = 1).value) {
         mutableStateListOf(
             *listOfNotNull(
@@ -101,6 +106,13 @@ fun ProfilePrefsPage() {
                 PreferenceGroup(
                     stringResource(id = R.string.title__general_profile),
                     prefs = profilePrefs,
+                    onPrefDialog = onPrefDialog
+                )
+            }
+            item {
+                PreferenceGroup(
+                    stringResource(id = R.string.cat_drawer_icons),
+                    prefs = iconPrefs,
                     onPrefDialog = onPrefDialog
                 )
             }
