@@ -31,14 +31,11 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.os.SystemClock
 import android.util.Log
-import androidx.annotation.NonNull
-import androidx.core.util.Supplier
 import com.android.launcher3.icons.BitmapInfo.Extender
 import com.android.launcher3.icons.FastBitmapDrawableDelegate.Companion.drawShaderInBounds
 import com.android.launcher3.icons.FastBitmapDrawableDelegate.DelegateFactory
 import com.android.launcher3.icons.GraphicsUtils.getColorMultipliedFilter
 import com.android.launcher3.icons.GraphicsUtils.resizeToContentSize
-import com.neoapps.neolauncher.icons.ClockMetadata
 import java.util.Calendar
 import java.util.concurrent.TimeUnit.MINUTES
 
@@ -270,7 +267,6 @@ private constructor(base: AdaptiveIconDrawable, private val animationInfo: Clock
             val pm = context.packageManager
             val appInfo =
                 pm.getApplicationInfo(pkg, MATCH_UNINSTALLED_PACKAGES or GET_META_DATA)
-                    ?: return null
             val res = pm.getResourcesForApplication(appInfo)
             val metadata = appInfo.metaData ?: return null
             val drawableId = metadata.getInt(ROUND_ICON_METADATA_KEY, 0)
@@ -283,7 +279,7 @@ private constructor(base: AdaptiveIconDrawable, private val animationInfo: Clock
 
             fun getLayerIndex(key: String) =
                 metadata.getInt(key, INVALID_VALUE).let {
-                    if (it < 0 || it >= layerCount) INVALID_VALUE else it
+                    if (it !in 0..<layerCount) INVALID_VALUE else it
                 }
 
             var animInfo =
@@ -297,7 +293,7 @@ private constructor(base: AdaptiveIconDrawable, private val animationInfo: Clock
                     baseDrawableState = drawable.constantState!!,
                 )
 
-            if (DISABLE_SECONDS && animInfo.secondLayerIndex != INVALID_VALUE) {
+            if (animInfo.secondLayerIndex != INVALID_VALUE) {
                 foreground.setDrawable(animInfo.secondLayerIndex, null)
                 animInfo = animInfo.copy(secondLayerIndex = INVALID_VALUE)
             }
