@@ -26,14 +26,18 @@ import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_ALL_APP
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_WIDGETS_PREDICTION;
 import static com.android.launcher3.LauncherSettings.Favorites.DESKTOP_ICON_FLAG;
-import static com.android.launcher3.icons.cache.CacheLookupFlag.DEFAULT_LOOKUP_FLAG;
 import static com.android.launcher3.model.PredictionHelper.getBundleForHotseatPredictions;
 import static com.android.launcher3.util.Executors.MODEL_EXECUTOR;
 
 import android.app.StatsManager;
 import android.app.prediction.AppPredictionContext;
+import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
+import android.app.prediction.AppTargetId;
 import android.content.Context;
+import android.content.pm.LauncherActivityInfo;
+import android.content.pm.LauncherApps;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -45,8 +49,10 @@ import androidx.annotation.WorkerThread;
 import com.android.launcher3.ConstantItem;
 import com.android.launcher3.Flags;
 import com.android.launcher3.InvariantDeviceProfile;
+import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.dagger.ApplicationContext;
+import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.InstanceIdSequence;
 import com.android.launcher3.model.AppEventProducer;
@@ -67,7 +73,9 @@ import com.neoapps.neolauncher.data.models.AppTracker;
 import com.neoapps.neolauncher.preferences.NeoPrefs;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -83,7 +91,7 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
 
     @VisibleForTesting
     final PredictorState mAllPredictionAppsState = new PredictorState(
-            CONTAINER_ALL_APPS_PREDICTION, "all_apps_predictions", DEFAULT_LOOKUP_FLAG);
+            CONTAINER_ALL_APPS_PREDICTION, "all_apps_predictions", DESKTOP_ICON_FLAG);
     @VisibleForTesting
     final PredictorState mHotseatPredictionState = new PredictorState(
             CONTAINER_HOTSEAT_PREDICTION, "hotseat_predictions", DESKTOP_ICON_FLAG);
@@ -254,8 +262,10 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
         MODEL_EXECUTOR.execute(() -> {
             AppTrackerRepository repo = AppTrackerRepository.Companion.getINSTANCE().get(mContext);
             List<AppTracker> recentApps = repo.getRecentApps(mIDP.numAllAppsColumns);
-            List<android.app.prediction.AppTarget> targets = new ArrayList<>();
-            android.content.pm.LauncherApps launcherApps = mContext.getSystemService(android.content.pm.LauncherApps.class);
+            List<AppTarget> targets = new ArrayList<>();
+            LauncherApps launcherApps = mContext.getSystemService(LauncherApps.class);
+            IconCache iconCache = LauncherAppState.getInstance(mContext).getIconCache();
+            Set<String> refreshedPackages = new HashSet<>();
 
             for (AppTracker app : recentApps) {
                 long userSerialNumber = 0L;
@@ -263,13 +273,17 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
                     userSerialNumber = app.getUserSerialNumber();
                 }
 
-                android.os.UserHandle user = mUserCache.getUserForSerialNumber(userSerialNumber);
+                UserHandle user = mUserCache.getUserForSerialNumber(userSerialNumber);
                 if (user != null) {
-                    List<android.content.pm.LauncherActivityInfo> activities = launcherApps.getActivityList(app.getPackageName(), user);
+                    String packageUserKey = app.getPackageName() + "#" + userSerialNumber;
+                    if (refreshedPackages.add(packageUserKey)) {
+                        iconCache.updateIconsForPkg(app.getPackageName(), user);
+                    }
+                    List<LauncherActivityInfo> activities = launcherApps.getActivityList(app.getPackageName(), user);
                     if (!activities.isEmpty()) {
-                        android.content.pm.LauncherActivityInfo activity = activities.get(0);
-                        targets.add(new android.app.prediction.AppTarget.Builder(
-                                new android.app.prediction.AppTargetId(app.getPackageName()),
+                        LauncherActivityInfo activity = activities.get(0);
+                        targets.add(new AppTarget.Builder(
+                                new AppTargetId(app.getPackageName()),
                                 activity.getComponentName().getPackageName(),
                                 user)
                                 .setClassName(activity.getComponentName().getClassName())
