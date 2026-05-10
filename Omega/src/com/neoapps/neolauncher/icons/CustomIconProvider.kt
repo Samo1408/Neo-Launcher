@@ -65,14 +65,10 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
         get() = iconPackProvider.getIconPack(iconPackPref.getValue())?.apply { loadBlocking() }
     private val themeMap: Map<String, ThemeData>
         get() {
-            if (drawerThemedIcons && !(isOlderLawnIconsInstalled)) {
+            if (!drawerThemedIcons) {
                 mThemedIconMap = DISABLED_MAP
             }
             if (mThemedIconMap == null) {
-                mThemedIconMap = getThemedIconMap()
-            }
-            if (isOlderLawnIconsInstalled && iconPackPref.getValue() == LAWNICONS_PACKAGE_NAME) {
-                themeMapName = iconPackPref.getValue()
                 mThemedIconMap = getThemedIconMap()
             }
             if (themedIconPack != null && themeMapName != themedIconPack!!.packPackageName) {
@@ -88,6 +84,14 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
 
     }
 
+    fun setIconThemeSupported(isSupported: Boolean) {
+        mThemedIconMap = if (isSupported && isOlderLawnIconsInstalled) null else DISABLED_MAP
+    }
+
+    override fun updateSystemState() {
+        super.updateSystemState()
+        mSystemState += ",${iconPackPref.getValue()},$drawerThemedIcons"
+    }
     private fun resolveIconEntry(componentName: ComponentName, user: UserHandle): IconEntry? {
         val componentKey = ComponentKey(componentName, user)
         val overrideItem = overrideRepo.overridesMap[componentKey]
@@ -122,7 +126,7 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
         val themeData = getThemeDataForPackage(packageName)
         var themedIcon: Drawable? = null
 
-        val themedColors = ThemedIconDrawable.getColors(context)
+        val themedColors = ThemedIconDrawable.getThemedColors(context)
 
         if (iconEntry != null) {
             val clock = iconPackProvider.getClockMetadata(iconEntry)
@@ -130,7 +134,6 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
             if (iconEntry.type == IconType.Calendar) {
                 iconPackEntry = iconEntry.resolveDynamicCalendar(getDay())
             }
-
             when {
                 !drawerThemedIcons -> {
                     themedIcon = null
@@ -173,21 +176,73 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
         return themedIcon ?: iconPackIcon ?: super.getIcon(info, appInfo, iconDpi)
     }
 
-    fun setIconThemeSupported(isSupported: Boolean) {
-        mThemedIconMap = if (isSupported && isOlderLawnIconsInstalled) null else DISABLED_MAP
-    }
-
-    override fun updateSystemState() {
-        super.updateSystemState()
-        mSystemState += ",${iconPackPref.getValue()},$drawerThemedIcons"
-    }
-
     override fun getIcon(info: ComponentInfo?): Drawable {
         return CustomAdaptiveIconDrawable.wrapNonNull(super.getIcon(info))
     }
 
     override fun getIcon(info: ComponentInfo?, iconDpi: Int): Drawable {
-        return CustomAdaptiveIconDrawable.wrapNonNull(super.getIcon(info, iconDpi))
+        val packageName = info!!.packageName
+        val componentName = context.packageManager.getLaunchIntentForPackage(packageName)?.component
+        val user = UserHandle.getUserHandleForUid(info.applicationInfo.uid)
+
+        var iconEntry: IconEntry? = null
+        if (componentName != null) {
+            iconEntry = resolveIconEntry(componentName, user)
+        }
+
+        var iconPackEntry = iconEntry
+
+        val themeData = getThemeDataForPackage(packageName)
+        var themedIcon: Drawable? = null
+
+        val themedColors = ThemedIconDrawable.getThemedColors(context)
+
+        if (iconEntry != null) {
+            val clock = iconPackProvider.getClockMetadata(iconEntry)
+
+            if (iconEntry.type == IconType.Calendar) {
+                iconPackEntry = iconEntry.resolveDynamicCalendar(getDay())
+            }
+            when {
+                !drawerThemedIcons -> {
+                    themedIcon = null
+                }
+
+                clock != null -> {
+                    themedIcon =
+                        ClockDrawableWrapper.forPackage(mContext, mClock.packageName, iconDpi)!!
+                            .getMonochrome()
+                }
+
+                packageName == mClock.packageName -> {
+                    val clockThemedData =
+                        ThemeData(context.resources, R.drawable.themed_icon_static_clock)
+                    themedIcon = CustomAdaptiveIconDrawable(
+                        themedColors[0].toDrawable(),
+                        clockThemedData.loadPaddedDrawable().apply { setTint(themedColors[1]) },
+                    )
+                }
+
+                packageName == mCalendar.packageName -> {
+                    themedIcon = loadCalendarDrawable(iconDpi, themeData)
+                }
+
+                else -> {
+                    themedIcon = if (themeData != null) {
+                        CustomAdaptiveIconDrawable(
+                            themedColors[0].toDrawable(),
+                            themeData.loadPaddedDrawable()?.apply { setTint(themedColors[1]) },
+                        )
+                    } else {
+                        null
+                    }
+                }
+            }
+        }
+
+        val iconPackIcon = iconPackEntry?.let { iconPackProvider.getDrawable(it, iconDpi, user) }
+
+        return themedIcon ?: iconPackIcon ?: super.getIcon(info, info.applicationInfo, iconDpi)
     }
 
     override fun getIcon(info: ApplicationInfo?): Drawable {

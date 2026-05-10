@@ -7,7 +7,6 @@ import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.os.Process
 import android.os.UserHandle
 import androidx.core.content.ContextCompat
 import com.android.launcher3.R
@@ -16,8 +15,6 @@ import com.android.launcher3.icons.mono.ThemedIconDrawable
 import com.android.launcher3.util.MainThreadInitializedObject
 import com.neoapps.neolauncher.icons.ClockMetadata
 import com.neoapps.neolauncher.icons.CustomAdaptiveIconDrawable
-import com.neoapps.neolauncher.icons.IconPreferences
-import com.neoapps.neolauncher.preferences.NeoPrefs
 import com.neoapps.neolauncher.util.Config
 import com.neoapps.neolauncher.util.minSDK
 import com.neoapps.neolauncher.util.prefs
@@ -87,27 +84,7 @@ class IconPackProvider(private val context: Context) {
         iconPack.loadBlocking()
         val packageManager = context.packageManager
         val drawable = iconPack.getIcon(iconEntry, iconDpi) ?: return null
-        val clockMetadata =
-            if (user == Process.myUserHandle()) iconPack.getClock(iconEntry) else null
         val shouldTintBackgrounds = context.prefs.profileIconColoredBackground.getValue()
-        val prefs = NeoPrefs.getInstance()
-
-        /*if (clockMetadata != null) {
-            val clockDrawable: ClockDrawableWrapper =
-                ClockDrawableWrapper.forMeta(Build.VERSION.SDK_INT, clockMetadata) {
-                    if (shouldTintBackgrounds)
-                        wrapThemedData(
-                            packageManager,
-                            iconEntry,
-                            drawable
-                        )
-                    else drawable
-                }
-            return if (shouldTintBackgrounds && prefs.profileTransparentBgIcons.getValue())
-                    clockDrawable.foreground
-                else
-                    CustomAdaptiveIconDrawable(clockDrawable.background, clockDrawable.foreground)
-        }*/
 
         if (shouldTintBackgrounds) {
             return wrapThemedData(packageManager, iconEntry, drawable)
@@ -121,11 +98,9 @@ class IconPackProvider(private val context: Context) {
         drawable: Drawable,
     ): Drawable {
         if (iconEntry.packPackageName.isEmpty()) return drawable
-        val themedColors: IntArray = ThemedIconDrawable.getColors(context)
+        val themedColors: IntArray = ThemedIconDrawable.getThemedColors(context)
         return try {
             val res = packageManager.getResourcesForApplication(iconEntry.packPackageName)
-
-            val iconPrefs = IconPreferences(context)
 
             @SuppressLint("DiscouragedApi")
             val resId = res.getIdentifier(iconEntry.name, "drawable", iconEntry.packPackageName)

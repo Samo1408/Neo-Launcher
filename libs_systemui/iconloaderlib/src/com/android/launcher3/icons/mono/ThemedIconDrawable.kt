@@ -15,17 +15,23 @@
  */
 package com.android.launcher3.icons.mono
 import android.content.Context
+import android.content.res.Configuration.UI_MODE_NIGHT_MASK
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Bitmap
 import android.graphics.BlendMode.SRC_IN
 import android.graphics.BlendModeColorFilter
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
+import androidx.annotation.ColorInt
+import androidx.core.graphics.ColorUtils
 import com.android.launcher3.icons.BitmapInfo
 import com.android.launcher3.icons.FastBitmapDrawable
 import com.android.launcher3.icons.FastBitmapDrawableDelegate
 import com.android.launcher3.icons.IconShape
 import com.android.launcher3.icons.R
+import com.neoapps.neolauncher.icons.IconPreferences
+
 /** Class to handle monochrome themed app icons */
 class ThemedIconDrawable(constantState: ThemedConstantState) :
     FastBitmapDrawable(constantState.bitmapInfo) {
@@ -83,6 +89,25 @@ class ThemedIconDrawable(constantState: ThemedConstantState) :
         /** Get an int array representing background and foreground colors for themed icons */
 
         const val FULLY_OPAQUE = 1
+
+        @ColorInt
+        fun getThemedColors(context: Context): IntArray {
+            val result = getColors(context)
+            val prefs = IconPreferences(context)
+            if (!prefs.coloredIconBackground()) {
+                return result
+            }
+            if ((context.resources
+                    .configuration.uiMode and UI_MODE_NIGHT_MASK) !== UI_MODE_NIGHT_YES
+            ) {
+                //Get Composite color for light mode or non dark mode
+                result[1] = ColorUtils.compositeColors(
+                    context.resources.getColor(android.R.color.black), result[1],
+                )
+            }
+            result[0] = 0
+            return result
+        }
 
         @JvmStatic
         fun getColors(context: Context): IntArray {

@@ -170,10 +170,8 @@ class NeoPrefs private constructor(val context: Context) {
             .getIconPackList()
             .associateBy(IconPackInfo::packageName, IconPackInfo::name),
         onChange = {
-            legacyPrefs.savePreference(
-                KEY_THEMED_ICONS,
-                it == context.getString(R.string.icon_packs_intent_name)
-            )
+            val themedIcons = it == context.getString(R.string.icon_packs_intent_name)
+            profileThemedIcons.setValue(themedIcons)
             reloadAll()
         }
     )
@@ -209,7 +207,7 @@ class NeoPrefs private constructor(val context: Context) {
         key = PrefKey.PROFILE_ICON_COLORED_BG,
         titleId = R.string.title_colored_backgrounds,
         summaryId = R.string.summary_colored_backgrounds,
-        defaultValue = false,
+        defaultValue = true,
         onChange = {
             legacyPrefs.savePreference("profile_icon_colored_background", it)
         }

@@ -134,6 +134,7 @@ class Config(val context: Context) {
             Intent("com.fede.launcher.THEME_ICONPACK"),
             Intent("com.gau.go.launcherex.theme"),
             Intent("com.dlto.atom.launcher.THEME"),
+            Intent("net.oneplus.launcher.icons.ACTION_PICK_ICON"),
         )
 
         val smartspaceEventProviders = mapOf(

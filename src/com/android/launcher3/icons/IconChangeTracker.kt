@@ -22,6 +22,8 @@ import android.content.Intent
 import android.content.Intent.ACTION_DATE_CHANGED
 import android.content.Intent.ACTION_TIMEZONE_CHANGED
 import android.content.Intent.ACTION_TIME_CHANGED
+import android.content.Intent.ACTION_TIME_TICK
+import android.content.IntentFilter
 import android.os.Process.myUserHandle
 import android.os.UserHandle
 import android.text.TextUtils
@@ -51,6 +53,7 @@ constructor(
 
     private val calendar = context.parseComponentOrNull(R.string.calendar_component_name)
     private val clock = context.parseComponentOrNull(R.string.clock_component_name)
+    private var lastCalendarDay = IconProvider.getDay()
 
     private val _changes = MutableListenableStream<PackageUserKey>()
     val changes = _changes.asListenable()
@@ -59,9 +62,7 @@ constructor(
         if (calendar != null || clock != null) {
             val receiver =
                 SimpleBroadcastReceiver(context = context, executor = executor) { handleIntent(it) }
-            receiver.register(
-                actionsFilter(ACTION_TIMEZONE_CHANGED, ACTION_TIME_CHANGED, ACTION_DATE_CHANGED)
-            )
+            receiver.register(iconChangeFilter(includeCalendarChanges = calendar != null))
             lifecycleTracker.addCloseable(receiver)
         }
     }
@@ -70,12 +71,21 @@ constructor(
         when (intent.action) {
             ACTION_TIMEZONE_CHANGED -> {
                 if (clock != null) notifyIconChanged(clock.packageName, myUserHandle())
-                dispatchCalendarIconChanged()
+                dispatchCalendarIconChangedIfNeeded()
             }
 
             ACTION_DATE_CHANGED,
-            ACTION_TIME_CHANGED -> dispatchCalendarIconChanged()
+            ACTION_TIME_CHANGED,
+            ACTION_TIME_TICK -> dispatchCalendarIconChangedIfNeeded()
         }
+    }
+
+    private fun dispatchCalendarIconChangedIfNeeded() {
+        val currentDay = IconProvider.getDay()
+        if (lastCalendarDay == currentDay) return
+
+        lastCalendarDay = currentDay
+        dispatchCalendarIconChanged()
     }
 
     private fun dispatchCalendarIconChanged() {
@@ -89,6 +99,16 @@ constructor(
     }
 
     companion object {
+        private fun iconChangeFilter(includeCalendarChanges: Boolean): IntentFilter {
+            return actionsFilter(ACTION_TIMEZONE_CHANGED).apply {
+                if (includeCalendarChanges) {
+                    addAction(ACTION_TIME_CHANGED)
+                    addAction(ACTION_DATE_CHANGED)
+                    addAction(ACTION_TIME_TICK)
+                }
+            }
+        }
+
         private fun Context.parseComponentOrNull(resId: Int): ComponentName? {
             val cn = getString(resId)
             return if (TextUtils.isEmpty(cn)) null else ComponentName.unflattenFromString(cn)
