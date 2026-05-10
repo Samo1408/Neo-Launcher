@@ -167,33 +167,6 @@ public class CustomAdaptiveIconDrawable extends AdaptiveIconDrawable implements 
         mTransparentRegion = new Region();
     }
 
-    public static @Nullable Drawable wrap(@Nullable Drawable icon) {
-        if (icon == null) {
-            return null;
-        }
-        return wrapNonNull(icon);
-    }
-
-    public static @NonNull Drawable wrapNonNull(@NonNull Drawable icon) {
-        if (icon.getClass() == AdaptiveIconDrawable.class) {
-            return SafeCustomAdaptiveIconDrawable((AdaptiveIconDrawable) icon);
-        }
-        return icon;
-    }
-
-    private ChildDrawable createChildDrawable(Drawable drawable) {
-        final ChildDrawable layer = new ChildDrawable(mLayerState.mDensity);
-        layer.mDrawable = drawable;
-        layer.mDrawable.setCallback(this);
-        mLayerState.mChildrenChangingConfigurations |=
-                layer.mDrawable.getChangingConfigurations();
-        return layer;
-    }
-
-    LayerState createConstantState(@Nullable LayerState state, @Nullable Resources res) {
-        return new LayerState(state, this, res);
-    }
-
     /**
      * Constructor used to dynamically create this drawable.
      *
@@ -224,6 +197,33 @@ public class CustomAdaptiveIconDrawable extends AdaptiveIconDrawable implements 
         if (monochromeDrawable != null) {
             addLayer(MONOCHROME_ID, createChildDrawable(monochromeDrawable));
         }
+    }
+
+    public static @Nullable Drawable wrap(@Nullable Drawable icon) {
+        if (icon == null) {
+            return null;
+        }
+        return wrapNonNull(icon);
+    }
+
+    public static @NonNull Drawable wrapNonNull(@NonNull Drawable icon) {
+        if (icon.getClass() == AdaptiveIconDrawable.class) {
+            return SafeCustomAdaptiveIconDrawable((AdaptiveIconDrawable) icon);
+        }
+        return icon;
+    }
+
+    private ChildDrawable createChildDrawable(Drawable drawable) {
+        final ChildDrawable layer = new ChildDrawable(mLayerState.mDensity);
+        layer.mDrawable = drawable;
+        layer.mDrawable.setCallback(this);
+        mLayerState.mChildrenChangingConfigurations |=
+                layer.mDrawable.getChangingConfigurations();
+        return layer;
+    }
+
+    LayerState createConstantState(@Nullable LayerState state, @Nullable Resources res) {
+        return new LayerState(state, this, res);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)

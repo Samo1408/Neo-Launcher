@@ -51,7 +51,7 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
 
     private val prefs = NeoPrefs.getInstance()
     private val iconPackPref = prefs.profileIconPack
-    private val drawerThemedIcons get() = prefs.profileThemedIcons.getValue()
+    private val themedIconsEnabled get() = prefs.profileThemedIcons.getValue()
     private var isOlderLawnIconsInstalled =
         context.packageManager.getPackageVersionCode(LAWNICONS_PACKAGE_NAME) in 1..3
     private val iconPackProvider = IconPackProvider.INSTANCE.get(context)
@@ -65,7 +65,7 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
         get() = iconPackProvider.getIconPack(iconPackPref.getValue())?.apply { loadBlocking() }
     private val themeMap: Map<String, ThemeData>
         get() {
-            if (!drawerThemedIcons) {
+            if (!themedIconsEnabled) {
                 mThemedIconMap = DISABLED_MAP
             }
             if (mThemedIconMap == null) {
@@ -89,7 +89,7 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
 
     override fun updateSystemState() {
         super.updateSystemState()
-        mSystemState += ",${iconPackPref.getValue()},$drawerThemedIcons"
+        mSystemState += ",${iconPackPref.getValue()},$themedIconsEnabled"
     }
     private fun resolveIconEntry(componentName: ComponentName, user: UserHandle): IconEntry? {
         val componentKey = ComponentKey(componentName, user)
@@ -134,7 +134,7 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
                 iconPackEntry = iconEntry.resolveDynamicCalendar(getDay())
             }
             when {
-                !drawerThemedIcons -> {
+                !themedIconsEnabled -> {
                     themedIcon = null
                 }
 

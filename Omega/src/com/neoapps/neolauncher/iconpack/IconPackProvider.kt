@@ -4,12 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.AdaptiveIconDrawable
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.os.Process
 import android.os.UserHandle
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
 import com.android.launcher3.R
+import com.android.launcher3.icons.ClockDrawableWrapper
 import com.android.launcher3.icons.IconProvider
 import com.android.launcher3.icons.mono.ThemedIconDrawable
 import com.android.launcher3.util.MainThreadInitializedObject
@@ -82,13 +84,28 @@ class IconPackProvider(private val context: Context) {
     fun getDrawable(iconEntry: IconEntry, iconDpi: Int, user: UserHandle): Drawable? {
         val iconPack = getIconPackOrSystem(iconEntry.packPackageName) ?: return null
         iconPack.loadBlocking()
-        val packageManager = context.packageManager
         val drawable = iconPack.getIcon(iconEntry, iconDpi) ?: return null
         val shouldTintBackgrounds = context.prefs.profileIconColoredBackground.getValue()
+        val clockMetadata =
+            if (user == Process.myUserHandle()) iconPack.getClock(iconEntry) else null
+        try {
+            if (clockMetadata != null) {
+                val clockDrawable: ClockDrawableWrapper? =
+                    ClockDrawableWrapper.forPackage(context, iconEntry.packPackageName, iconDpi)
 
-        if (shouldTintBackgrounds) {
-            return wrapThemedData(packageManager, iconEntry, drawable)
+                return if (shouldTintBackgrounds) {
+                    clockDrawable!!.foreground
+                } else {
+                    CustomAdaptiveIconDrawable(
+                        clockDrawable!!.background,
+                        clockDrawable.foreground,
+                    )
+                }
+            }
+        } catch (t: Throwable) {
+            // Ignore
         }
+
         return drawable
     }
 
@@ -104,7 +121,7 @@ class IconPackProvider(private val context: Context) {
 
             @SuppressLint("DiscouragedApi")
             val resId = res.getIdentifier(iconEntry.name, "drawable", iconEntry.packPackageName)
-            val bg: Drawable = ColorDrawable(themedColors[0])
+            val bg: Drawable = themedColors[0].toDrawable()
             val td = IconProvider.ThemeData(res, resId)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 drawable is AdaptiveIconDrawable &&
