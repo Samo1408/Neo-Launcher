@@ -182,13 +182,9 @@ public class NeoLauncherModelDelegate extends ModelDelegate {
                 CollectionInfo parent = getContainer(info, itemsIdMap);
                 StatsLogCompatManager.writeSnapshot(info.buildProto(parent, mContext), instanceId);
             }
-            additionalSnapshotEvents(instanceId);
             prefs.put(LAST_SNAPSHOT_TIME_MILLIS, now);
         }
 
-    }
-
-    protected void additionalSnapshotEvents(InstanceId snapshotInstanceId) {
     }
 
     private static CollectionInfo getContainer(
