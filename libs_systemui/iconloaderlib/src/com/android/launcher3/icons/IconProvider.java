@@ -42,6 +42,7 @@ import androidx.core.os.BuildCompat;
 
 import com.android.launcher3.icons.cache.CachingLogic;
 import com.android.launcher3.util.ComponentKey;
+import com.neoapps.neolauncher.icons.CustomAdaptiveIconDrawable;
 
 import java.util.Calendar;
 import java.util.Objects;
@@ -127,9 +128,11 @@ public class IconProvider {
         if (icon == null) {
             icon = loadPackageIconWithFallback(info, appInfo, iconDpi);
             if (ATLEAST_T && icon instanceof AdaptiveIconDrawable && td != null) {
-                AdaptiveIconDrawable aid = (AdaptiveIconDrawable) icon;
+                CustomAdaptiveIconDrawable aid = (CustomAdaptiveIconDrawable) CustomAdaptiveIconDrawable.wrapNonNull(
+                        icon
+                );
                 if  (aid.getMonochrome() == null) {
-                    icon = new AdaptiveIconDrawable(aid.getBackground(),
+                    icon = new CustomAdaptiveIconDrawable(aid.getBackground(),
                             aid.getForeground(), td.loadPaddedDrawable());
                 }
             }
@@ -215,8 +218,10 @@ public class IconProvider {
      */
     @NonNull
     public Drawable getFullResDefaultActivityIcon(final int iconDpi) {
-        return Objects.requireNonNull(Resources.getSystem().getDrawableForDensity(
+        Drawable icon = Objects.requireNonNull(Resources.getSystem().getDrawableForDensity(
                 android.R.drawable.sym_def_app_icon, iconDpi));
+
+        return CustomAdaptiveIconDrawable.wrapNonNull(icon);
     }
     /**
      * @param metadata metadata of the default activity of Calendar

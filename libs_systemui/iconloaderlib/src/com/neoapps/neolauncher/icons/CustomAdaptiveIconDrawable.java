@@ -119,6 +119,7 @@ public class CustomAdaptiveIconDrawable extends AdaptiveIconDrawable implements 
      */
     private static final int BACKGROUND_ID = 0;
     private static final int FOREGROUND_ID = 1;
+    private static final int MONOCHROME_ID = 2;
 
     /**
      * State variable that maintains the {@link ChildDrawable} array.
@@ -175,7 +176,7 @@ public class CustomAdaptiveIconDrawable extends AdaptiveIconDrawable implements 
 
     public static @NonNull Drawable wrapNonNull(@NonNull Drawable icon) {
         if (icon.getClass() == AdaptiveIconDrawable.class) {
-            return new CustomAdaptiveIconDrawable((AdaptiveIconDrawable) icon);
+            return SafeCustomAdaptiveIconDrawable((AdaptiveIconDrawable) icon);
         }
         return icon;
     }
@@ -201,6 +202,18 @@ public class CustomAdaptiveIconDrawable extends AdaptiveIconDrawable implements 
      */
     public CustomAdaptiveIconDrawable(Drawable backgroundDrawable,
                                       Drawable foregroundDrawable) {
+        this(backgroundDrawable, foregroundDrawable, null);
+    }
+
+    /**
+     * Constructor used to dynamically create this drawable.
+     *
+     * @param backgroundDrawable drawable that should be rendered in the background
+     * @param foregroundDrawable drawable that should be rendered in the foreground
+     * @param monochromeDrawable an alternate drawable which can be tinted per system theme color
+     */
+    public CustomAdaptiveIconDrawable(@Nullable Drawable backgroundDrawable,
+                                      @Nullable Drawable foregroundDrawable, @Nullable Drawable monochromeDrawable) {
         this((LayerState) null, null);
         if (backgroundDrawable != null) {
             addLayer(BACKGROUND_ID, createChildDrawable(backgroundDrawable));
@@ -208,10 +221,22 @@ public class CustomAdaptiveIconDrawable extends AdaptiveIconDrawable implements 
         if (foregroundDrawable != null) {
             addLayer(FOREGROUND_ID, createChildDrawable(foregroundDrawable));
         }
+        if (monochromeDrawable != null) {
+            addLayer(MONOCHROME_ID, createChildDrawable(monochromeDrawable));
+        }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private CustomAdaptiveIconDrawable(AdaptiveIconDrawable drawable) {
-        this(drawable.getBackground(), drawable.getForeground());
+        this(drawable.getBackground(), drawable.getForeground(), drawable.getMonochrome());
+    }
+
+    private static Drawable SafeCustomAdaptiveIconDrawable(AdaptiveIconDrawable drawable) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return new CustomAdaptiveIconDrawable(drawable);
+        } else {
+            return new CustomAdaptiveIconDrawable(drawable.getBackground(), drawable.getForeground(), null);
+        }
     }
 
     /**
@@ -279,6 +304,17 @@ public class CustomAdaptiveIconDrawable extends AdaptiveIconDrawable implements 
      */
     public Drawable getBackground() {
         return mLayerState.mChildren[BACKGROUND_ID].mDrawable;
+    }
+
+    /**
+     * Returns the monochrome version of this drawable. Callers can use a tinted version of
+     * this drawable instead of the original drawable on surfaces stressing user theming.
+     *
+     * @return the monochrome drawable
+     */
+    @Nullable
+    public Drawable getMonochrome() {
+        return mLayerState.mChildren[MONOCHROME_ID].mDrawable;
     }
 
     @Override
@@ -802,7 +838,7 @@ public class CustomAdaptiveIconDrawable extends AdaptiveIconDrawable implements 
     static class LayerState extends ConstantState {
         private int[] mThemeAttrs;
 
-        final static int N_CHILDREN = 2;
+        final static int N_CHILDREN = 3;
         ChildDrawable[] mChildren;
 
         // The density at which to render the drawable and its children.
