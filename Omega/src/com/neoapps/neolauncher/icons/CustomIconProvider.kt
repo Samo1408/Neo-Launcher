@@ -81,7 +81,6 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
 
     init {
         setIconThemeSupported(themeManager.isIconThemeEnabled && supportsIconTheme)
-
     }
 
     fun setIconThemeSupported(isSupported: Boolean) {
@@ -178,79 +177,6 @@ class CustomIconProvider @JvmOverloads @Inject constructor(
 
     override fun getIcon(info: ComponentInfo?): Drawable {
         return CustomAdaptiveIconDrawable.wrapNonNull(super.getIcon(info))
-    }
-
-    override fun getIcon(info: ComponentInfo?, iconDpi: Int): Drawable {
-        val packageName = info!!.packageName
-        val componentName = context.packageManager.getLaunchIntentForPackage(packageName)?.component
-        val user = UserHandle.getUserHandleForUid(info.applicationInfo.uid)
-
-        var iconEntry: IconEntry? = null
-        if (componentName != null) {
-            iconEntry = resolveIconEntry(componentName, user)
-        }
-
-        var iconPackEntry = iconEntry
-
-        val themeData = getThemeDataForPackage(packageName)
-        var themedIcon: Drawable? = null
-
-        val themedColors = ThemedIconDrawable.getThemedColors(context)
-
-        if (iconEntry != null) {
-            val clock = iconPackProvider.getClockMetadata(iconEntry)
-
-            if (iconEntry.type == IconType.Calendar) {
-                iconPackEntry = iconEntry.resolveDynamicCalendar(getDay())
-            }
-            when {
-                !drawerThemedIcons -> {
-                    themedIcon = null
-                }
-
-                clock != null -> {
-                    themedIcon =
-                        ClockDrawableWrapper.forPackage(mContext, mClock.packageName, iconDpi)!!
-                            .getMonochrome()
-                }
-
-                packageName == mClock.packageName -> {
-                    val clockThemedData =
-                        ThemeData(context.resources, R.drawable.themed_icon_static_clock)
-                    themedIcon = CustomAdaptiveIconDrawable(
-                        themedColors[0].toDrawable(),
-                        clockThemedData.loadPaddedDrawable().apply { setTint(themedColors[1]) },
-                    )
-                }
-
-                packageName == mCalendar.packageName -> {
-                    themedIcon = loadCalendarDrawable(iconDpi, themeData)
-                }
-
-                else -> {
-                    themedIcon = if (themeData != null) {
-                        CustomAdaptiveIconDrawable(
-                            themedColors[0].toDrawable(),
-                            themeData.loadPaddedDrawable()?.apply { setTint(themedColors[1]) },
-                        )
-                    } else {
-                        null
-                    }
-                }
-            }
-        }
-
-        val iconPackIcon = iconPackEntry?.let { iconPackProvider.getDrawable(it, iconDpi, user) }
-
-        return themedIcon ?: iconPackIcon ?: super.getIcon(info, info.applicationInfo, iconDpi)
-    }
-
-    override fun getIcon(info: ApplicationInfo?): Drawable {
-        return CustomAdaptiveIconDrawable.wrapNonNull(super.getIcon(info))
-    }
-
-    override fun getIcon(info: ApplicationInfo?, iconDpi: Int): Drawable {
-        return CustomAdaptiveIconDrawable.wrapNonNull(super.getIcon(info, iconDpi))
     }
 
     companion object {
