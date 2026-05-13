@@ -4,7 +4,6 @@ on:
     branches: [ A-13 ]
   pull_request:
     branches: [ A-13 ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
