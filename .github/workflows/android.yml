@@ -29,6 +29,7 @@ jobs:
       - name: Compile with Gradle
         run: ./gradlew assembleAospOmega
 
+
       - name: Save name of our Artifact
         id: set-result-artifact
         run: |
